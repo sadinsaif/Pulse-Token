@@ -205,6 +205,20 @@ export default function TestSolFaucet({ network: pinned, onFunded }) {
         </div>
       </div>
 
+      {/* Always-available official faucet link — a real, working alternate
+          source of test SOL that works even when the treasury is empty or the
+          public RPC airdrop is throttled. Routes to Solana's own faucet; nothing
+          is faked here, we just point users at a genuine faucet. */}
+      {available ? (
+        <p className="brief" style={{ marginTop: 8 }}>
+          You can also claim {network.label} test SOL from the{" "}
+          <a href="https://faucet.solana.com" target="_blank" rel="noopener noreferrer">
+            official Solana faucet ↗
+          </a>{" "}
+          — pick <strong>{network.label}</strong> there and paste your wallet address.
+        </p>
+      ) : null}
+
       {result ? (
         <div className={`alert ${result.ok ? "ok" : "err"}`} style={{ marginTop: 6 }}>
           {result.msg}
