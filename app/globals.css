@@ -3650,7 +3650,7 @@ tbody tr:last-child td { border-bottom: none; }
    PULSE (PLSX) — multi-network ecosystem upgrade layer.
    Network selector, ecosystem dashboard, testnet playground,
    DeFi "Coming Soon" cards, real test-SOL faucet, tx-safety.
-   Additive only; reuses .panel/.kpi/.soon-card/.sec-*/.btn*.
+   Additive only; reuses existing panel, kpi, soon-card, sec and btn styles.
    Rev: multi-network ecosystem tone system active.
    ============================================================ */
 
