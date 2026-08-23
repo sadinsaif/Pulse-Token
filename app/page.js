@@ -11,10 +11,6 @@ import {
   explorerUrl,
 } from "@/lib/solana";
 
-// The main PulseFy app — every login-bound action deep-links here.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://pulsefycorp.vercel.app";
-const DASH_HREF = `${APP_URL}/dashboard/token`;
-
 const NETWORK_LABEL =
   NETWORK === "mainnet-beta"
     ? "Solana Mainnet"
@@ -36,18 +32,16 @@ const GLANCE = [
 ];
 
 const UTILITY = [
-  ["🪙", "Hold to earn", "Rewards accrue the longer you hold, based on your on-chain balance. There's nothing to stake, deposit, or lock up."],
-  ["🔒", "Non-custodial", "Your $PULSE never leaves your wallet. We only read your balance and pay rewards out — we never take custody of your tokens."],
-  ["🤝", "Ecosystem-aligned", "$PULSE is built into PulseFy, so the community growing the creator economy can share in it."],
-  ["🏦", "Treasury-funded claims", "Claim accrued rewards to your verified wallet, paid from the community treasury after a quick review."],
+  ["🔒", "Non-custodial", "$PULSE lives in your own wallet. Connecting here only reads your balance — it never moves, holds, or locks your tokens."],
+  ["⚡", "Built on Solana", "A standard SPL token with fast, low-cost transfers. Your balance is read live from the Solana blockchain."],
+  ["🪙", "Fixed supply", "1,000,000,000 $PULSE total. Verify the supply and mint yourself on-chain using the address below."],
+  ["📖", "Utility, not investment", "$PULSE is a utility token — not a security or a promise of profit. Always do your own research."],
 ];
 
 const STEPS = [
-  ["Connect your wallet", "Use Phantom or Solflare on Solana. Connecting is read-only — it never moves funds."],
-  ["Verify ownership", "On the PulseFy app, sign a free message to link your wallet to your account. Signing costs nothing and sends no transaction."],
-  ["Hold $PULSE", "Keep your tokens in your own wallet. Your balance is snapshotted over time — no deposit required."],
-  ["Rewards accrue", "Hold-to-earn rewards build up automatically from your held balance. Track them on your dashboard."],
-  ["Claim to your wallet", "Request a claim and receive it to your verified wallet, paid from the community treasury after review."],
+  ["Connect your wallet", "Use Phantom or Solflare on Solana. Connecting is read-only — it never moves funds or signs a transaction."],
+  ["Hold $PULSE", "Keep your tokens in your own wallet. Nothing is deposited, staked, or locked up."],
+  ["Check your balance", "Your live on-chain $PULSE balance appears instantly, read straight from the Solana blockchain."],
 ];
 
 export default function TokenSitePage() {
@@ -65,24 +59,23 @@ export default function TokenSitePage() {
               <span className="dot"></span> {NETWORK_LABEL} · SPL utility token
             </span>
             <h1>
-              $PULSE — fuel for the{" "}
-              <span className="grad">PulseFy</span> creator economy.
+              $PULSE — a non-custodial token on{" "}
+              <span className="grad">Solana</span>.
             </h1>
             <p className="sub" style={{ marginInline: "auto" }}>
-              A Solana SPL utility token with <strong>non-custodial, hold-to-earn</strong> rewards.
-              Hold $PULSE in your own wallet, earn rewards over time, and claim them from the
-              community treasury — no lock-ups, no deposits.
+              Your keys, your tokens. Connect your Solana wallet to see your{" "}
+              <strong>live on-chain $PULSE balance</strong> — read-only, no signing, no deposits.
             </p>
             <div className="hero-actions" style={{ justifyContent: "center" }}>
               <a href="#balance" className="btn btn-primary btn-lg">
                 Connect &amp; check balance →
               </a>
-              <a href="#how" className="btn btn-ghost btn-lg">
-                How rewards work
+              <a href="#contract" className="btn btn-ghost btn-lg">
+                Token details
               </a>
             </div>
             <p className="hero-note">
-              $PULSE is a utility token, not an investment. Rewards depend on treasury funding and are not guaranteed.
+              $PULSE is a utility token, not an investment. Always do your own research.
             </p>
           </div>
         </div>
@@ -138,8 +131,8 @@ export default function TokenSitePage() {
         <div className="container">
           <Reveal className="section-head">
             <span className="tag">Utility</span>
-            <h2>What $PULSE is for.</h2>
-            <p>A working token built around holding — not hype. Here&apos;s exactly how it behaves.</p>
+            <h2>What $PULSE is.</h2>
+            <p>A straightforward Solana SPL token. Here&apos;s exactly how it behaves — no hype.</p>
           </Reveal>
           <div className="features why-choose">
             {UTILITY.map(([icon, title, body]) => (
@@ -153,31 +146,28 @@ export default function TokenSitePage() {
         </div>
       </section>
 
-      {/* ===================== HOW REWARDS WORK ===================== */}
+      {/* ===================== HOW IT WORKS ===================== */}
       <section className="section workflow-section" id="how">
         <div className="container">
           <Reveal className="section-head">
             <span className="tag">How it works</span>
-            <h2>Hold in your wallet. Earn over time.</h2>
-            <p>Five steps, fully non-custodial — your tokens stay yours the entire way.</p>
+            <h2>See your $PULSE in seconds.</h2>
+            <p>No account, no sign-up — just your wallet. Fully non-custodial the whole way.</p>
           </Reveal>
           <ol className="workflow">
             {STEPS.map(([title, body], i) => (
               <Reveal as="li" className="wf-step" key={title}>
                 <span className="wf-dot">{i + 1}</span>
-                <div className="wf-icon">{["🔌", "✍️", "🪙", "📈", "💸"][i]}</div>
+                <div className="wf-icon">{["🔌", "🪙", "📊"][i]}</div>
                 <h3>{title}</h3>
                 <p>{body}</p>
               </Reveal>
             ))}
           </ol>
           <Reveal style={{ textAlign: "center", marginTop: 28 }}>
-            <a href={DASH_HREF} className="btn btn-primary btn-lg">
-              Verify, track rewards &amp; claim on PulseFy →
+            <a href="#balance" className="btn btn-primary btn-lg">
+              Connect &amp; check balance →
             </a>
-            <p className="brief" style={{ marginTop: 12, color: "var(--text-mute)" }}>
-              Wallet verification, reward tracking and claims happen on the main PulseFy app.
-            </p>
           </Reveal>
         </div>
       </section>
@@ -284,8 +274,8 @@ export default function TokenSitePage() {
             <h3 style={{ marginTop: 0 }}>The honest bit</h3>
             <ul className="pulse-points" style={{ marginBottom: 0 }}>
               <li>$PULSE is a <strong>utility token</strong>, not a security, share, or investment product.</li>
-              <li>Nothing here is financial advice. Rewards are <strong>not guaranteed</strong> and depend on treasury funding.</li>
-              <li>It&apos;s <strong>non-custodial</strong> — we never take, hold, or lock your tokens; they stay in your wallet.</li>
+              <li>Nothing here is financial advice. Always <strong>do your own research</strong> before interacting with any token.</li>
+              <li>It&apos;s <strong>non-custodial</strong> — this site only reads your balance; it never takes, holds, or locks your tokens.</li>
               <li>On devnet, $PULSE is for testing only and has no monetary value.</li>
             </ul>
           </Reveal>
@@ -296,11 +286,20 @@ export default function TokenSitePage() {
       <section className="section">
         <div className="container">
           <Reveal className="cta-band final-cta">
-            <h2>Ready to hold and earn?</h2>
-            <p>Connect your Solana wallet to see your balance here, then verify it and claim rewards on PulseFy.</p>
+            <h2>See your $PULSE balance.</h2>
+            <p>Connect your Solana wallet — it takes a few seconds and never moves your funds.</p>
             <div className="final-cta-actions">
               <a href="#balance" className="btn btn-primary btn-lg">Connect &amp; check balance →</a>
-              <a href={DASH_HREF} className="btn btn-ghost btn-lg">Open PulseFy dashboard ↗</a>
+              {configured ? (
+                <a
+                  href={explorerUrl(TOKEN_MINT, "address")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost btn-lg"
+                >
+                  View the mint ↗
+                </a>
+              ) : null}
             </div>
           </Reveal>
         </div>
@@ -313,9 +312,9 @@ export default function TokenSitePage() {
             <div className="footer-brand">
               <a href="#top" className="logo">
                 <span className="logo-mark" aria-hidden="true" />
-                <span className="wordmark">Pulse<span className="wm-fy">Fy</span></span>
+                <span className="wordmark"><span className="wm-fy">$</span>PULSE</span>
               </a>
-              <p>Infrastructure for the creator economy. From brief to payout — automated.</p>
+              <p>A non-custodial utility token on Solana. Your keys, your tokens.</p>
             </div>
             <div className="footer-col">
               <h4>$PULSE</h4>
@@ -325,19 +324,22 @@ export default function TokenSitePage() {
               <a href="#contract">Token address</a>
             </div>
             <div className="footer-col">
-              <h4>PulseFy</h4>
-              <a href={APP_URL} target="_blank" rel="noopener noreferrer">Main site ↗</a>
-              <a href={`${APP_URL}/token`} target="_blank" rel="noopener noreferrer">$PULSE on PulseFy ↗</a>
-              <a href={DASH_HREF} target="_blank" rel="noopener noreferrer">Dashboard ↗</a>
-            </div>
-            <div className="footer-col">
-              <h4>Legal</h4>
-              <a href={`${APP_URL}/#`} target="_blank" rel="noopener noreferrer">Privacy</a>
-              <a href={`${APP_URL}/#`} target="_blank" rel="noopener noreferrer">Terms</a>
+              <h4>On-chain</h4>
+              {configured ? (
+                <a href={explorerUrl(TOKEN_MINT, "address")} target="_blank" rel="noopener noreferrer">
+                  View mint ↗
+                </a>
+              ) : null}
+              <a href="https://explorer.solana.com" target="_blank" rel="noopener noreferrer">
+                Solana Explorer ↗
+              </a>
+              <a href="https://solana.com" target="_blank" rel="noopener noreferrer">
+                About Solana ↗
+              </a>
             </div>
           </div>
           <div className="footer-bottom">
-            <span>© 2026 PulseFy. All rights reserved.</span>
+            <span>© 2026 $PULSE.</span>
             <span>$PULSE is a utility token, not an investment.</span>
           </div>
         </div>

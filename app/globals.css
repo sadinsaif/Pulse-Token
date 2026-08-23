@@ -328,7 +328,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .logo-mark {
   display: inline-block;
   width: 34px; height: 34px;
-  background-image: url('/logo-mark.png');
+  background-image: url('/token/logo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -336,8 +336,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
   font-size: 0;
   flex: none;
 }
-/* Colorful "PulseFy" wordmark: "Pulse" keeps the logo's white; "Fy" takes the
-   magenta→blue gradient from the brand logo. */
+/* Gradient accent used on the "$" of the "$PULSE" wordmark — the magenta→blue
+   gradient pulled from the token logo. */
 .wm-fy {
   background: linear-gradient(135deg, #e64be0 0%, #a05cf0 48%, #3d8bff 100%);
   -webkit-background-clip: text;

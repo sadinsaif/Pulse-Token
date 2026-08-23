@@ -13,9 +13,6 @@ import {
   NETWORK,
 } from "@/lib/solana";
 
-// Rewards + claim live on the main app (one source of truth for the money).
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://pulsefycorp.vercel.app";
-
 const NETWORK_LABEL =
   NETWORK === "mainnet-beta"
     ? "Solana Mainnet"
@@ -26,11 +23,9 @@ const NETWORK_LABEL =
 const panelStyle = { maxWidth: 720, margin: "0 auto" };
 
 /**
- * The one genuinely new piece of this site: connect a wallet and show its LIVE
- * on-chain $PULSE balance — a pure client-side Solana RPC read, no backend, no
- * signing, no transaction. Verifying the wallet, viewing accrued rewards, and
- * claiming all require an authenticated PulseFy account, so those are a deep-link
- * to the main app rather than duplicated here.
+ * The core of this site: connect a Solana wallet and show its LIVE on-chain
+ * $PULSE balance — a pure client-side RPC read. Nothing is stored, no backend
+ * is called, and connecting never signs a transaction or moves any funds.
  */
 export default function BalancePanel() {
   const { publicKey, connected } = useWallet();
@@ -137,14 +132,11 @@ export default function BalancePanel() {
           {error ? <div className="alert err" style={{ marginTop: 12 }}>{error}</div> : null}
 
           <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <a href={`${APP_URL}/dashboard/token`} className="btn btn-primary">
-              View rewards &amp; claim →
-            </a>
             <WalletConnectButton className="btn btn-ghost" />
           </div>
           <p className="brief" style={{ marginTop: 12, marginBottom: 0, color: "var(--text-mute)", fontSize: 13 }}>
-            Rewards accrue and claims are paid on the main PulseFy app, where your wallet is verified to
-            your account.
+            Your balance is read live from the Solana blockchain. Nothing is stored here and no
+            transaction is signed.
           </p>
         </>
       )}

@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 
-// Where the login-bound actions (dashboard, rewards, claim) live — the main app.
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://pulsefycorp.vercel.app";
-
 /**
- * Simplified marketing navbar for the standalone token site. Reuses the main app's
- * `.nav` markup + classes, but has NO session/sign-out state — the primary CTA
- * deep-links into the main app's $PULSE dashboard.
+ * Marketing navbar for the standalone $PULSE token site. Fully self-contained —
+ * no links to, or dependency on, any other site. The primary CTA jumps to the
+ * on-page live-balance section.
  */
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -19,20 +16,17 @@ export default function Navbar() {
       <div className="container nav-inner">
         <a href="#top" className="logo" onClick={close}>
           <span className="logo-mark" aria-hidden="true" />
-          <span className="wordmark">Pulse<span className="wm-fy">Fy</span></span>
+          <span className="wordmark"><span className="wm-fy">$</span>PULSE</span>
         </a>
         <div className="nav-links" style={open ? mobileOpen : undefined}>
           <a href="#utility" onClick={close}>Utility</a>
           <a href="#how" onClick={close}>How it works</a>
           <a href="#balance" onClick={close}>Your balance</a>
           <a href="#contract" onClick={close}>Token address</a>
-          <a href={APP_URL} target="_blank" rel="noopener noreferrer" onClick={close}>
-            Main site ↗
-          </a>
         </div>
         <div className="nav-cta">
-          <a href={`${APP_URL}/dashboard/token`} className="btn btn-primary">
-            Open dashboard →
+          <a href="#balance" className="btn btn-primary">
+            Check balance →
           </a>
         </div>
         <button className="nav-toggle" onClick={() => setOpen((v) => !v)} aria-label="Menu">

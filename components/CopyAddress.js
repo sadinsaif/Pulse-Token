@@ -6,8 +6,7 @@ import { useState } from "react";
  * A click-to-copy address chip for public pages. Deliberately takes only plain
  * string props (the value + optional short label) so the landing page can render
  * it WITHOUT pulling @solana/web3.js into the client bundle — the server computes
- * the address string and passes it down. Mirrors the `.addr-copy` styling used by
- * the admin claims table.
+ * the address string and passes it down.
  */
 export default function CopyAddress({ value, label, className = "" }) {
   const [copied, setCopied] = useState(false);

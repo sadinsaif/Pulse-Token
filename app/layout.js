@@ -5,9 +5,9 @@ import WaveBackground from "@/components/WaveBackground";
 const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || "PULSE";
 
 export const metadata = {
-  title: `$${TOKEN_SYMBOL} — the PulseFy token`,
+  title: `$${TOKEN_SYMBOL} — a Solana utility token`,
   description:
-    "$PULSE is a Solana SPL utility token with non-custodial, hold-to-earn rewards. Connect your wallet, see your live on-chain balance, and claim rewards on PulseFy. Utility token, not an investment.",
+    "$PULSE is a non-custodial Solana SPL utility token. Connect your Solana wallet to see your live on-chain $PULSE balance — read-only, no signing, no deposits. A utility token, not an investment.",
 };
 
 export default function RootLayout({ children }) {

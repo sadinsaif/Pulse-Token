@@ -6,7 +6,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { shortAddress } from "@/lib/solana";
 
 /**
- * Connect / disconnect button styled with PulseFy's own `.btn` classes (not the
+ * Connect / disconnect button styled with the site's own `.btn` classes (not the
  * wallet-adapter default look). Opens the wallet-select modal when disconnected;
  * shows the short address and disconnects on click when connected.
  *

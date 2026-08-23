@@ -2,7 +2,7 @@
   "name": "pulse-token-site",
   "version": "0.1.0",
   "private": true,
-  "description": "Standalone marketing + read-only dApp for the $PULSE Solana token. Rewards/claim deep-link into the main PulseFy app.",
+  "description": "Standalone marketing site + read-only dApp for the $PULSE Solana token: connect a wallet and see your live on-chain balance.",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
