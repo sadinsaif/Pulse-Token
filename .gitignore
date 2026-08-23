@@ -11,6 +11,12 @@
 .env.local
 .env*.local
 
+# faucet / wallet keypairs — NEVER commit a secret key file
+faucet.json
+faucet*.json
+*.keypair.json
+/.keys/
+
 # misc
 .DS_Store
 *.pem

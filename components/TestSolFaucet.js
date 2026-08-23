@@ -11,18 +11,25 @@ import {
   LAMPORTS_PER_SOL,
 } from "@/lib/solana";
 
-// Real, keyless test-SOL faucet.
+// Self-service test-SOL faucet.
 //
-// "Request Test SOL" calls connection.requestAirdrop — a genuine on-chain
-// airdrop funded by the cluster, needing NO private key and NO wallet signature.
-// It exists only on devnet/testnet and the public faucet is heavily rate-limited,
-// so we (a) enforce our own 1-request-per-wallet-per-24h guard in localStorage,
-// and (b) on failure show the REAL error + a link to the official web faucet —
-// never a fake "success".
+// PRIMARY path: POST /api/faucet, a server route that transfers test SOL from a
+// USER-FUNDED treasury wallet straight to the connected wallet. This does NOT
+// depend on the flaky public faucet, so it works whenever the treasury has a
+// balance. The treasury secret lives only on the server (never in this file).
+//
+// FALLBACK path: if the treasury isn't configured for this cluster yet
+// (reason "not-configured" / "wrong-cluster"), we fall back to the keyless
+// public airdrop (connection.requestAirdrop) — today's behavior — so nothing
+// breaks before the treasury is set up. On any failure we show the REAL error
+// and a link to the official web faucet; we never fake a success.
+//
+// Either way the claim is rate-limited to 1 / wallet / 24h. The server is the
+// real enforcer; this localStorage guard is a first-line UX convenience.
 //
 // PLSX faucet stays "Coming Soon": there is no controlled testnet mint authority,
 // and a mint-authority secret must NEVER live in frontend code.
-const REQUEST_LAMPORTS = 1 * LAMPORTS_PER_SOL; // 1 SOL (public faucets cap low)
+const REQUEST_LAMPORTS = 1 * LAMPORTS_PER_SOL; // fallback public-faucet request size
 const COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 export default function TestSolFaucet({ network: pinned, onFunded }) {
@@ -58,29 +65,104 @@ export default function TestSolFaucet({ network: pinned, onFunded }) {
   const onCooldown = cooldownUntil > now;
   const hoursLeft = onCooldown ? Math.ceil((cooldownUntil - now) / (60 * 60 * 1000)) : 0;
 
+  // Persist a cooldown so `msFromNow` from now shows as "try again" (survives
+  // refresh). The reader effect above computes cooldownUntil = stored + 24h, so
+  // we store the value that makes that arithmetic land on the target instant.
+  function persistCooldown(msFromNow) {
+    const until = Date.now() + msFromNow;
+    try {
+      window.localStorage.setItem(guardKey, String(until - COOLDOWN_MS));
+    } catch {
+      /* ignore */
+    }
+    setCooldownUntil(until);
+  }
+
+  // Keyless public-faucet fallback (the original behavior).
+  async function keylessFallback() {
+    try {
+      const conn = connectionFor(network.rpc);
+      const sig = await requestAirdropFor(conn, address, REQUEST_LAMPORTS);
+      persistCooldown(COOLDOWN_MS);
+      setResult({
+        ok: true,
+        sig,
+        msg: "Airdrop confirmed (public faucet). Your test SOL balance will update shortly.",
+      });
+      if (typeof onFunded === "function") onFunded();
+    } catch (e) {
+      const raw = e?.message || String(e);
+      setResult({
+        ok: false,
+        msg:
+          raw.includes("429") || /rate|limit|faucet/i.test(raw)
+            ? "The public faucet is rate-limited right now. Try again later or use the official web faucet below."
+            : `Airdrop failed: ${raw}`,
+      });
+    }
+  }
+
   async function requestSol() {
     if (!connected || !address || busy || onCooldown) return;
     setBusy(true);
     setResult(null);
     try {
-      const conn = connectionFor(network.rpc);
-      const sig = await requestAirdropFor(conn, address, REQUEST_LAMPORTS);
+      // 1) Try the treasury faucet first.
+      let data;
       try {
-        window.localStorage.setItem(guardKey, String(Date.now()));
+        const res = await fetch("/api/faucet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address, cluster: network.cluster }),
+        });
+        data = await res.json();
       } catch {
-        /* ignore */
+        data = { ok: false, reason: "network" };
       }
-      setCooldownUntil(Date.now() + COOLDOWN_MS);
-      setResult({ ok: true, sig, msg: "Airdrop confirmed. Your test SOL balance will update shortly." });
-      if (typeof onFunded === "function") onFunded();
-    } catch (e) {
-      // Surface the REAL error — public faucets frequently rate-limit or refuse.
-      const raw = e?.message || String(e);
+
+      const sig = data?.signature || data?.sig;
+      if (data?.ok && sig) {
+        persistCooldown(COOLDOWN_MS);
+        const amt = data.amountSol != null ? `${data.amountSol} ` : "";
+        setResult({
+          ok: true,
+          sig,
+          msg: `Sent ${amt}test SOL from the treasury. Your balance will update shortly.`,
+        });
+        if (typeof onFunded === "function") onFunded();
+        return;
+      }
+
+      // 2) Treasury not available for this cluster → keyless public faucet.
+      if (data?.reason === "not-configured" || data?.reason === "wrong-cluster") {
+        await keylessFallback();
+        return;
+      }
+
+      // 3) Server-enforced cooldown — reflect it in the client guard too.
+      if (data?.reason === "cooldown") {
+        const ms = Number(data.retryAfterMs) || COOLDOWN_MS;
+        persistCooldown(ms);
+        const hrs = Math.ceil(ms / (60 * 60 * 1000));
+        setResult({ ok: false, msg: `You've already claimed recently. Try again in ${hrs}h.` });
+        return;
+      }
+
+      // 4) Treasury empty.
+      if (data?.reason === "empty") {
+        setResult({
+          ok: false,
+          msg: "The faucet treasury is empty right now. Please use the official web faucet below or come back later.",
+        });
+        return;
+      }
+
+      // 5) Anything else (tx-failed / bad-address / network) → honest error.
       setResult({
         ok: false,
-        msg: raw.includes("429") || /rate|limit|faucet/i.test(raw)
-          ? "The public faucet is rate-limited right now. Try again later or use the official web faucet below."
-          : `Airdrop failed: ${raw}`,
+        msg: data?.message
+          ? `Faucet error: ${data.message}`
+          : "The faucet couldn't complete your request. Please try the official web faucet below.",
       });
     } finally {
       setBusy(false);
@@ -96,12 +178,12 @@ export default function TestSolFaucet({ network: pinned, onFunded }) {
         <span className={`tag-pill tone-${network.tone}`}>{network.short}</span>
       </div>
 
-      {/* Test SOL — REAL requestAirdrop */}
+      {/* Test SOL — treasury transfer, with keyless public-faucet fallback */}
       <div className="faucet-row">
         <div className="faucet-info">
           <strong>Test SOL</strong>
           <p className="brief">
-            Get {network.label} test SOL to pay transaction fees. Public faucet — may be rate-limited.
+            Get {network.label} test SOL to pay transaction fees. One claim per wallet per 24h.
             Test SOL has no monetary value.
           </p>
         </div>
