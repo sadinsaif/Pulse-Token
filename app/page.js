@@ -15,6 +15,7 @@ import {
   MINT_ADDRESS,
   EXPLORER_TRANSFERS,
 } from "@/lib/config";
+import { DEVNET_CONFIG } from "@/config/networks";
 
 // Top-line facts for the stats band. Values are real; nothing here implies price.
 const STATS = [
@@ -112,8 +113,33 @@ export default function TokenSitePage() {
             <p>Connect a Solana wallet to read your live on-chain balance — read-only, no signing, no transaction.</p>
           </Reveal>
           <Reveal>
-            <BalancePanel />
+            <BalancePanel network={DEVNET_CONFIG} />
           </Reveal>
+        </div>
+      </section>
+
+      {/* ===================== ECOSYSTEM TEASER ===================== */}
+      <section className="section" id="ecosystem" style={{ paddingTop: 8 }}>
+        <div className="container">
+          <Reveal className="section-head">
+            <span className="tag">Ecosystem</span>
+            <h2>Explore the {PROJECT_NAME} ecosystem.</h2>
+            <p>A multi-network platform — Devnet today, Testnet in Beta, Mainnet reserved for the future.</p>
+          </Reveal>
+          <div className="eco-teaser">
+            <Reveal className="eco-teaser-card">
+              <div className="eco-teaser-ic" aria-hidden="true">🌐</div>
+              <h3>{PROJECT_NAME} Ecosystem</h3>
+              <p>Your live {TOKEN_SYMBOL} and SOL balances with a Devnet/Testnet network selector. DeFi features are honestly marked Coming Soon.</p>
+              <a href="/ecosystem" className="btn btn-green btn-sm">Open dashboard →</a>
+            </Reveal>
+            <Reveal className="eco-teaser-card">
+              <div className="eco-teaser-ic" aria-hidden="true">🧪</div>
+              <h3>{TOKEN_SYMBOL} Testnet Playground</h3>
+              <p>Explore the ecosystem with test assets before Mainnet — a real test-SOL faucet and live balances on Solana Testnet.</p>
+              <a href="/testnet" className="btn btn-ghost btn-sm">Open playground →</a>
+            </Reveal>
+          </div>
         </div>
       </section>
 
@@ -232,7 +258,7 @@ export default function TokenSitePage() {
             <p>Read live from Solana — not claims. Verify every value yourself on Explorer.</p>
           </Reveal>
           <Reveal>
-            <SecurityStatus />
+            <SecurityStatus network={DEVNET_CONFIG} />
           </Reveal>
         </div>
       </section>

@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useNetwork } from "@/components/NetworkProvider";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import {
-  getSplBalanceBase,
+  connectionFor,
+  getSplBalanceBaseFor,
   formatTokensPretty,
-  isTokenConfigured,
-  explorerUrl,
+  explorerUrlFor,
   shortAddress,
 } from "@/lib/solana";
-import { TOKEN_SYMBOL, NETWORK_LABEL } from "@/lib/config";
+import { TOKEN_SYMBOL } from "@/lib/config";
 
 const panelStyle = { maxWidth: 720, margin: "0 auto" };
 
@@ -18,8 +19,17 @@ const panelStyle = { maxWidth: 720, margin: "0 auto" };
  * The live dApp core: connect a Solana wallet and show its LIVE on-chain PLSX
  * balance — a pure client-side RPC read. Nothing is stored, no backend is
  * called, and connecting never signs a transaction or moves any funds.
+ *
+ * NETWORK-AWARE: reads the selected (or a pinned) network. If that network has
+ * no PLSX mint (Testnet/Mainnet — mint is null), it honestly says the token
+ * isn't deployed there yet rather than faking a balance.
+ *
+ * Props:
+ *   network  optional config to pin the panel to (defaults to global selection).
  */
-export default function BalancePanel() {
+export default function BalancePanel({ network: pinned }) {
+  const ctx = useNetwork();
+  const network = pinned || ctx.network;
   const { publicKey, connected } = useWallet();
   const [mounted, setMounted] = useState(false);
   const [balance, setBalance] = useState(null); // BigInt base units | null
@@ -29,7 +39,8 @@ export default function BalancePanel() {
   useEffect(() => setMounted(true), []);
 
   const address = publicKey?.toBase58() || "";
-  const configured = isTokenConfigured();
+  // "Configured" now means: this network actually has a PLSX mint to read.
+  const configured = Boolean(network.features.balance && network.mint);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +52,8 @@ export default function BalancePanel() {
       setLoading(true);
       setError("");
       try {
-        const b = await getSplBalanceBase(address);
+        const conn = connectionFor(network.rpc);
+        const b = await getSplBalanceBaseFor(conn, network.mint, address);
         if (!cancelled) setBalance(b);
       } catch {
         if (!cancelled) setError("Couldn't read your on-chain balance. Please try again.");
@@ -53,7 +65,7 @@ export default function BalancePanel() {
     return () => {
       cancelled = true;
     };
-  }, [connected, address, configured]);
+  }, [connected, address, configured, network.rpc, network.mint]);
 
   // Stable placeholder before mount → no hydration mismatch from wallet state.
   if (!mounted) {
@@ -67,15 +79,21 @@ export default function BalancePanel() {
     );
   }
 
+  // No PLSX mint on this network yet (Testnet / Mainnet) — honest, not fake.
   if (!configured) {
     return (
       <div className="panel" style={panelStyle}>
-        <div className="panel-head">
+        <div
+          className="panel-head"
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
+        >
           <h3 style={{ margin: 0 }}>Your {TOKEN_SYMBOL} Balance</h3>
+          <span className={`tag-pill tone-${network.tone}`}>{network.short}</span>
         </div>
         <p className="brief" style={{ margin: 0 }}>
-          {TOKEN_SYMBOL} isn&apos;t live yet. Once the mint is configured, connect your wallet here to
-          see your live on-chain balance.
+          No {TOKEN_SYMBOL} token is deployed on {network.label} yet.{" "}
+          <strong>Coming Soon.</strong> {TOKEN_SYMBOL} currently lives on Solana Devnet — switch to Devnet
+          to see your live balance.
         </p>
       </div>
     );
@@ -88,7 +106,7 @@ export default function BalancePanel() {
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
       >
         <h3 style={{ margin: 0 }}>Your {TOKEN_SYMBOL} Balance</h3>
-        <span className="tag-pill" style={{ color: "var(--text-mute)", fontSize: 13 }}>{NETWORK_LABEL}</span>
+        <span className={`tag-pill tone-${network.tone}`}>{network.label}</span>
       </div>
 
       {!connected ? (
@@ -114,7 +132,7 @@ export default function BalancePanel() {
               <div className="k-top"><span className="k-ic">👛</span></div>
               <div className="k-val" style={{ fontSize: 16 }}>{shortAddress(address, 4, 4)}</div>
               <div className="k-lbl">
-                <a href={explorerUrl(address, "address")} target="_blank" rel="noopener noreferrer">
+                <a href={explorerUrlFor(network.cluster, address, "address")} target="_blank" rel="noopener noreferrer">
                   View on Explorer ↗
                 </a>
               </div>

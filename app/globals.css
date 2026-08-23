@@ -22,6 +22,20 @@
   --warn:        #f6c453;
   --ok:          #4ade80;
 
+  /* Per-network tone tokens (multi-network ecosystem): amber = Devnet/testing,
+     blue = Testnet/Beta, grey = Mainnet/Coming Soon. Emerald (--accent) stays
+     the PRIMARY brand accent. Kept in this (primary) :root on purpose — a second
+     top-level :root block appended later gets dropped by the CSS optimizer. */
+  --net-test:      var(--warn);              /* amber */
+  --net-test-soft: rgba(246,196,83,.12);
+  --net-test-line: rgba(246,196,83,.34);
+  --net-beta:      #4ea1ff;                  /* blue */
+  --net-beta-soft: rgba(78,161,255,.12);
+  --net-beta-line: rgba(78,161,255,.36);
+  --net-soon:      var(--text-mute);         /* grey */
+  --net-soon-soft: rgba(255,255,255,.045);
+  --net-soon-line: var(--border);
+
   /* accent tints (green, matching the primary emerald accent) */
   --accent-soft: rgba(62,224,160,.10);
   --accent-line: rgba(62,224,160,.26);
@@ -350,8 +364,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
   align-items: center;
   gap: 32px;
 }
-.nav-links a { color: var(--text-dim); font-size: 14.5px; font-weight: var(--fw-medium); letter-spacing: -.006em; transition: color var(--t-med) var(--ease); }
-.nav-links a:hover { color: var(--text); }
+.nav-links a:not(.btn) { color: var(--text-dim); font-size: 14.5px; font-weight: var(--fw-medium); letter-spacing: -.006em; transition: color var(--t-med) var(--ease); }
+.nav-links a:not(.btn):hover { color: var(--text); }
 /* Animated emerald underline on the plain text links only — the pill
    buttons (.btn-ambassador, Dashboard CTA) opt out via :not(.btn). */
 .nav-links a:not(.btn) { position: relative; }
@@ -3630,5 +3644,192 @@ tbody tr:last-child td { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .rm-phase, .faq-item, .soon-card { transition: none !important; }
   .netstat-dot { animation: none !important; }
+}
+
+/* ============================================================
+   PULSE (PLSX) — multi-network ecosystem upgrade layer.
+   Network selector, ecosystem dashboard, testnet playground,
+   DeFi "Coming Soon" cards, real test-SOL faucet, tx-safety.
+   Additive only; reuses .panel/.kpi/.soon-card/.sec-*/.btn*.
+   Rev: multi-network ecosystem tone system active.
+   ============================================================ */
+
+/* Per-network tone tokens (--net-test/-beta/-soon + soft/line) live in the
+   PRIMARY :root at the top of this file — a second top-level :root appended
+   here gets dropped by the CSS optimizer, so it must not be redefined below. */
+
+/* ---- Status dots (shared by selector + ecosystem strip) ---- */
+.netsel-dot, .eco-net-dot {
+  width: 9px; height: 9px; border-radius: 50%; flex: none;
+  background: var(--text-mute);
+}
+.netsel-dot.tone-test, .eco-net-dot.tone-test { background: var(--net-test); box-shadow: 0 0 0 3px var(--net-test-soft); }
+.netsel-dot.tone-beta, .eco-net-dot.tone-beta { background: var(--net-beta); box-shadow: 0 0 0 3px var(--net-beta-soft); }
+.netsel-dot.tone-soon, .eco-net-dot.tone-soon { background: var(--net-soon); box-shadow: none; }
+
+/* ---- Network selector (dropdown) ---- */
+.netsel { position: relative; }
+.netsel-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--bg-card-2); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font-display); font-weight: 700;
+  font-size: 12.5px; letter-spacing: .05em; cursor: pointer;
+  transition: border-color var(--t-med) var(--ease), background var(--t-med) var(--ease);
+}
+.netsel-btn:hover { border-color: var(--accent-green-line); background: var(--bg-card); }
+.netsel-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-green-soft); }
+.netsel-cur { white-space: nowrap; }
+.netsel-caret { font-size: 10px; color: var(--text-mute); line-height: 1; }
+.netsel-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  min-width: 236px; margin: 0; padding: 6px; list-style: none;
+  border-radius: 14px; background: var(--bg-elev); border: 1px solid var(--lx-border);
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,.8);
+}
+.netsel-menu li { list-style: none; }
+.netsel-item {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; border: none; background: transparent;
+  color: var(--text); font-size: 13.5px; text-align: left; cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+.netsel-item:hover:not(.is-disabled) { background: var(--bg-card-2); }
+.netsel-item.is-current { background: var(--accent-green-soft); }
+.netsel-item.is-disabled { opacity: .5; cursor: not-allowed; }
+.netsel-name { font-family: var(--font-display); font-weight: 700; letter-spacing: .04em; }
+.netsel-tag {
+  margin-left: auto; font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid transparent;
+}
+.netsel-tag.tone-test { color: var(--net-test); background: var(--net-test-soft); border-color: var(--net-test-line); }
+.netsel-tag.tone-beta { color: var(--net-beta); background: var(--net-beta-soft); border-color: var(--net-beta-line); }
+.netsel-tag.tone-soon { color: var(--net-soon); background: var(--net-soon-soft); border-color: var(--net-soon-line); }
+.netsel-check { color: var(--accent-green); font-weight: 800; margin-left: 4px; }
+
+/* ---- pill / tag-pill tone variants ---- */
+.pill.tone-beta { background: linear-gradient(180deg, rgba(78,161,255,.10), rgba(78,161,255,.03)); }
+.pill.tone-beta .dot { background: var(--net-beta); box-shadow: 0 0 0 3px var(--net-beta-soft), 0 0 10px var(--net-beta); }
+.tag-pill.tone-test { color: var(--net-test); background: var(--net-test-soft); border-color: var(--net-test-line); }
+.tag-pill.tone-beta { color: var(--net-beta); background: var(--net-beta-soft); border-color: var(--net-beta-line); }
+.tag-pill.tone-soon { color: var(--net-soon); background: var(--net-soon-soft); border-color: var(--net-soon-line); }
+
+/* ---- Ecosystem status strip (all three networks, honest) ---- */
+.eco-status { max-width: 900px; margin: 0 auto; }
+.eco-status-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.eco-net {
+  flex: 1; min-width: 190px; display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; border-radius: var(--radius);
+  background: var(--lx-surface-grad); border: 1px solid var(--lx-border);
+  box-shadow: var(--lx-shadow);
+}
+.eco-net-name { font-family: var(--font-display); font-weight: 800; font-size: 13px; letter-spacing: .06em; }
+.eco-net-status { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--text-mute); }
+.eco-net.tone-test .eco-net-status { color: var(--net-test); }
+.eco-net.tone-beta .eco-net-status { color: var(--net-beta); }
+.eco-net.tone-soon .eco-net-status { color: var(--net-soon); }
+.eco-net.is-current.tone-test { border-color: var(--net-test-line); background: linear-gradient(180deg, var(--net-test-soft), transparent); }
+.eco-net.is-current.tone-beta { border-color: var(--net-beta-line); background: linear-gradient(180deg, var(--net-beta-soft), transparent); }
+.eco-net.is-current.tone-soon { border-color: var(--net-soon-line); }
+.eco-status-note { margin-top: 14px; text-align: center; font-size: 13px; color: var(--lx-text-mute); line-height: 1.6; }
+
+/* ---- Ecosystem / Testnet page header ---- */
+.eco-head-section { padding-top: 48px; }
+.eco-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.eco-head-copy { flex: 1; min-width: 280px; }
+.eco-head-copy h1 {
+  font-family: var(--font-display); font-size: clamp(30px, 5vw, 52px);
+  letter-spacing: -.03em; line-height: 1.05; margin: 14px 0 12px; font-weight: 800;
+}
+.eco-head-copy .sub { color: var(--text-dim); font-size: 16px; line-height: 1.6; max-width: 640px; }
+.eco-head-select { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.eco-select-label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-mute); font-weight: 700; }
+
+/* ---- Landing ecosystem teaser (two cards) ---- */
+.eco-teaser { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; max-width: 900px; margin: 0 auto; }
+.eco-teaser-card {
+  padding: 30px 28px; border-radius: var(--radius-lg);
+  background: var(--lx-surface-grad); border: 1px solid var(--lx-border);
+  box-shadow: var(--lx-shadow);
+  transition: transform var(--t-med) var(--ease), border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease);
+}
+.eco-teaser-card:hover { transform: translateY(-4px); border-color: var(--accent-green-line); box-shadow: var(--lx-shadow-hover); }
+.eco-teaser-ic { font-size: 30px; margin-bottom: 12px; }
+.eco-teaser-card h3 { font-size: 19px; margin-bottom: 8px; letter-spacing: -.01em; }
+.eco-teaser-card p { color: var(--text-dim); font-size: 14.5px; line-height: 1.6; margin-bottom: 18px; }
+
+/* ---- DeFi "Coming Soon" cards (Swap / Stake / Lend / Borrow / Liquidity) ---- */
+.defi-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.defi-card { text-align: left; display: flex; gap: 16px; align-items: flex-start; padding: 22px; }
+.defi-card .soon-ic {
+  margin: 0; flex: none; width: 46px; height: 46px; font-size: 24px;
+  display: grid; place-items: center; border-radius: 12px;
+  background: var(--accent-green-soft); border: 1px solid var(--accent-green-line);
+}
+.defi-card-body { flex: 1; min-width: 0; }
+.defi-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.defi-card-head h4 { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+.defi-card .soon-badge { margin-bottom: 0; }
+.defi-card .brief { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; margin-bottom: 8px; }
+.defi-card-why { font-size: 12.5px; color: var(--lx-text-mute); line-height: 1.5; }
+
+/* ---- Faucet card (real test-SOL airdrop; PLSX = Coming Soon) ---- */
+.faucet-panel { padding: 22px 24px; }
+.faucet-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--lx-border); }
+.faucet-row:first-of-type { border-top: none; padding-top: 4px; }
+.faucet-info { flex: 1; min-width: 0; }
+.faucet-info strong { font-size: 14.5px; }
+.faucet-info .brief { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin-top: 4px; }
+.faucet-action { flex: none; }
+.faucet-row-soon { opacity: .72; }
+
+/* ---- Transaction-safety panel ---- */
+.txsafe-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; }
+.txsafe-list li { position: relative; padding-left: 26px; font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+.txsafe-list li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--accent-green); font-weight: 800; }
+.txsafe-list strong { color: var(--text); font-weight: 700; }
+
+/* ---- Testnet playground: status strip + grid ---- */
+.tn-status {
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  padding: 16px 20px; border-radius: var(--radius);
+  background: var(--lx-surface-grad); border: 1px solid var(--lx-border); box-shadow: var(--lx-shadow);
+}
+.tn-status-item { display: flex; flex-direction: column; gap: 3px; }
+.tn-k { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-mute); font-weight: 700; }
+.tn-v { font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.tn-v a { color: var(--accent-green); }
+.tn-v a:hover { text-decoration: underline; }
+.tn-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.tn-dot.is-on { background: var(--accent-green); box-shadow: 0 0 0 3px var(--accent-green-soft); }
+.tn-dot.is-off { background: var(--text-mute); }
+.tn-status-action { margin-left: auto; }
+.tn-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+
+/* ---- Nav route links (Ecosystem / Testnet) read a touch stronger ---- */
+.nav-route { color: var(--text); }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .tn-grid { grid-template-columns: 1fr; }
+  .eco-head { align-items: flex-start; }
+}
+@media (max-width: 768px) {
+  .eco-teaser { grid-template-columns: 1fr; }
+  .eco-head-select { width: 100%; }
+  .netsel-menu { min-width: 200px; }
+}
+@media (max-width: 560px) {
+  .eco-status-row { flex-direction: column; }
+  .eco-net { min-width: 0; }
+  .tn-status { gap: 14px; }
+  .tn-status-action { margin-left: 0; width: 100%; }
+  .defi-grid { grid-template-columns: 1fr; }
+  .defi-card { flex-direction: column; }
+  .faucet-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .faucet-action { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eco-teaser-card, .netsel-btn, .netsel-item { transition: none !important; }
 }
 

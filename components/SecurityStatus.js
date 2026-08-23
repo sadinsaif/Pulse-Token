@@ -2,31 +2,46 @@
 
 import { useEffect, useState } from "react";
 import CopyAddress from "@/components/CopyAddress";
+import { useNetwork } from "@/components/NetworkProvider";
 import {
-  getMintStatus,
+  connectionFor,
+  getMintStatusFor,
   formatTokensPretty,
-  explorerUrl,
+  explorerUrlFor,
   shortAddress,
-  TOKEN_MINT,
 } from "@/lib/solana";
-import { TOKEN_SYMBOL, NETWORK_LABEL } from "@/lib/config";
+import { TOKEN_SYMBOL } from "@/lib/config";
 
 /**
  * Security & Transparency — shows ONLY what we can verify live on-chain.
- * Reads the mint account (supply, decimals, mint/freeze authority) via
- * getMintStatus(). No fabricated audit badges or green "verified" checks:
- * authorities are reported exactly as they are (Active vs Revoked), and
- * third-party verification is honestly labelled "Not yet verified".
+ * Reads the selected network's mint account (supply, decimals, mint/freeze
+ * authority) via getMintStatusFor(). No fabricated audit badges or green
+ * "verified" checks: authorities are reported exactly as they are (Active vs
+ * Revoked), and third-party verification is honestly "Not yet verified".
+ *
+ * NETWORK-AWARE: networks without a deployed PLSX mint (Testnet/Mainnet) show an
+ * honest notice instead of a link to a non-existent address.
+ *
+ * Props:
+ *   network  optional config to pin to (defaults to the global selection).
  */
-export default function SecurityStatus() {
+export default function SecurityStatus({ network: pinned }) {
+  const ctx = useNetwork();
+  const network = pinned || ctx.network;
+  const mint = network.mint;
+  const canRead = Boolean(network.features.security && mint);
+
   const [status, setStatus] = useState(null); // mint status | null
   const [state, setState] = useState("loading"); // loading | ok | error
 
   useEffect(() => {
+    if (!canRead) return undefined;
     let cancelled = false;
+    setState("loading");
+    setStatus(null);
     (async () => {
       try {
-        const s = await getMintStatus();
+        const s = await getMintStatusFor(connectionFor(network.rpc), mint);
         if (cancelled) return;
         if (!s) {
           setState("error");
@@ -41,7 +56,7 @@ export default function SecurityStatus() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [canRead, network.rpc, mint]);
 
   const authRow = (auth) =>
     auth ? (
@@ -54,15 +69,37 @@ export default function SecurityStatus() {
       </span>
     );
 
+  // No mint on this network → honest notice, no fake rows, no dead links.
+  if (!canRead) {
+    return (
+      <div className="panel sec-panel" style={{ maxWidth: 820, margin: "0 auto" }}>
+        <div className="sec-row">
+          <span className="sec-label">Network</span>
+          <span className="sec-value">{network.label}</span>
+        </div>
+        <div className="sec-row">
+          <span className="sec-label">On-chain status</span>
+          <span className="sec-value sec-muted">
+            No {TOKEN_SYMBOL} token is deployed on {network.label} yet — nothing to inspect here.
+            Security details are available on Solana Devnet, where {TOKEN_SYMBOL} is live.
+          </span>
+        </div>
+        <p className="sec-foot">
+          We never show a mint address or authority status for a token that doesn&apos;t exist.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="panel sec-panel" style={{ maxWidth: 820, margin: "0 auto" }}>
       <div className="sec-grid">
-        {/* Mint address — always known from config, copyable + explorer */}
+        {/* Mint address — known from config, copyable + explorer */}
         <div className="sec-row">
           <span className="sec-label">Mint Address</span>
           <span className="sec-value sec-addr">
-            <CopyAddress value={TOKEN_MINT} />
-            <a href={explorerUrl(TOKEN_MINT, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
+            <CopyAddress value={mint} />
+            <a href={explorerUrlFor(network.cluster, mint, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
               Explorer ↗
             </a>
           </span>
@@ -71,7 +108,7 @@ export default function SecurityStatus() {
         {/* Network */}
         <div className="sec-row">
           <span className="sec-label">Network</span>
-          <span className="sec-value">{NETWORK_LABEL}</span>
+          <span className="sec-value">{network.label}</span>
         </div>
 
         {/* Live-read rows */}
@@ -87,7 +124,7 @@ export default function SecurityStatus() {
             <span className="sec-label">On-chain status</span>
             <span className="sec-value sec-muted">
               Couldn&apos;t read the mint right now. Verify directly on{" "}
-              <a href={explorerUrl(TOKEN_MINT, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
+              <a href={explorerUrlFor(network.cluster, mint, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
                 Solana Explorer ↗
               </a>
             </span>
@@ -123,7 +160,7 @@ export default function SecurityStatus() {
           <span className="sec-label">Metadata</span>
           <span className="sec-value">
             On-chain (Metaplex) ·{" "}
-            <a href={explorerUrl(TOKEN_MINT, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
+            <a href={explorerUrlFor(network.cluster, mint, "address")} target="_blank" rel="noopener noreferrer" className="sec-link">
               Explorer ↗
             </a>
           </span>

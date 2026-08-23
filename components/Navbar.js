@@ -1,25 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import NetworkSelector from "@/components/NetworkSelector";
 import { EXPLORER_TRANSFERS } from "@/lib/config";
 
 /**
- * Marketing navbar for the standalone PULSE token site. Self-contained — no
- * links to, or dependency on, any other site. Brand mark is "PULSE"; the token
- * ticker (PLSX) appears in the page content, not the logo.
+ * Marketing + ecosystem navbar for the standalone PULSE token site.
+ * Self-contained — no links to, or dependency on, any other site. Brand mark is
+ * "PULSE"; the token ticker (PLSX) appears in the page content, not the logo.
  *
- * "Explore Token" opens the real Solana Explorer (devnet). "Join Community"
- * jumps to the on-page community section (which honestly says links are coming
- * soon) — no fabricated social links.
+ * Route links (Ecosystem / Testnet) point at real pages; section links are
+ * absolute (/#id) so they resolve from any route. "Explore Token" opens the real
+ * Solana Explorer (devnet). The NetworkSelector switches Devnet/Testnet.
  */
+const ROUTES = [
+  ["Ecosystem", "/ecosystem"],
+  ["Testnet", "/testnet"],
+];
 const LINKS = [
-  ["About", "#about"],
-  ["Tokenomics", "#tokenomics"],
-  ["Utility", "#utility"],
-  ["Roadmap", "#roadmap"],
-  ["Security", "#security"],
-  ["FAQ", "#faq"],
-  ["Docs", "#docs"],
+  ["Tokenomics", "/#tokenomics"],
+  ["Roadmap", "/#roadmap"],
+  ["Security", "/#security"],
+  ["FAQ", "/#faq"],
 ];
 
 export default function Navbar() {
@@ -29,18 +31,24 @@ export default function Navbar() {
   return (
     <nav className="nav">
       <div className="container nav-inner">
-        <a href="#top" className="logo" onClick={close}>
+        <a href="/#top" className="logo" onClick={close}>
           <span className="logo-mark" aria-hidden="true" />
           <span className="wordmark">PULSE</span>
         </a>
 
         <div className="nav-links" style={open ? mobileOpen : undefined}>
+          {ROUTES.map(([label, href]) => (
+            <a href={href} key={href} className="nav-route" onClick={close}>
+              {label}
+            </a>
+          ))}
           {LINKS.map(([label, href]) => (
             <a href={href} key={href} onClick={close}>
               {label}
             </a>
           ))}
           <span className="nav-cta">
+            <NetworkSelector />
             <a
               href={EXPLORER_TRANSFERS}
               target="_blank"
@@ -49,9 +57,6 @@ export default function Navbar() {
               onClick={close}
             >
               Explore Token ↗
-            </a>
-            <a href="#community" className="btn btn-ghost btn-sm" onClick={close}>
-              Join Community
             </a>
           </span>
         </div>
