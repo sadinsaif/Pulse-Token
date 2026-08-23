@@ -1,0 +1,21 @@
+{
+  "name": "pulse-token-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone marketing + read-only dApp for the $PULSE Solana token. Rewards/claim deep-link into the main PulseFy app.",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@solana/web3.js": "^1.95.8",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35"
+  }
+}

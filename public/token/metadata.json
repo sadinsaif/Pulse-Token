@@ -1,0 +1,17 @@
+{
+  "name": "PulseFy",
+  "symbol": "PULSE",
+  "description": "The utility token of the PulseFy creator-marketing ecosystem. Non-custodial hold-to-earn rewards accrue for holders and are paid from a community treasury. PULSE is a utility token, not an investment; rewards depend on treasury funding and are not guaranteed.",
+  "image": "https://pulsefycorp.vercel.app/token/logo.png",
+  "external_url": "https://pulsefycorp.vercel.app",
+  "attributes": [],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://pulsefycorp.vercel.app/token/logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
