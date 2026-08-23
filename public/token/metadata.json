@@ -1,0 +1,13 @@
+{
+  "name": "PULSE",
+  "symbol": "PULSE",
+  "description": "$PULSE is a non-custodial Solana SPL utility token. Connect your Solana wallet to see your live on-chain balance — read-only, no signing, no deposits. A utility token, not an investment.",
+  "image": "https://pulse-token-six.vercel.app/token/logo.png",
+  "external_url": "https://pulse-token-six.vercel.app",
+  "properties": {
+    "files": [
+      { "uri": "https://pulse-token-six.vercel.app/token/logo.png", "type": "image/png" }
+    ],
+    "category": "image"
+  }
+}
