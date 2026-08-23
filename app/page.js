@@ -2,51 +2,58 @@ import Navbar from "@/components/Navbar";
 import Reveal from "@/components/Reveal";
 import CopyAddress from "@/components/CopyAddress";
 import BalancePanel from "@/components/BalancePanel";
+import NetworkStatus from "@/components/NetworkStatus";
+import Tokenomics from "@/components/Tokenomics";
+import SecurityStatus from "@/components/SecurityStatus";
+import FAQ from "@/components/FAQ";
 import {
-  NETWORK,
+  PROJECT_NAME,
   TOKEN_SYMBOL,
-  TOKEN_DECIMALS,
-  TOKEN_MINT,
-  isTokenConfigured,
-  explorerUrl,
-} from "@/lib/solana";
+  NETWORK_LABEL,
+  TOTAL_SUPPLY,
+  DECIMALS,
+  MINT_ADDRESS,
+  EXPLORER_TRANSFERS,
+} from "@/lib/config";
 
-const NETWORK_LABEL =
-  NETWORK === "mainnet-beta"
-    ? "Solana Mainnet"
-    : NETWORK === "devnet"
-    ? "Solana Devnet"
-    : `Solana ${NETWORK.charAt(0).toUpperCase()}${NETWORK.slice(1)}`;
-
-const IS_MAINNET = NETWORK === "mainnet-beta";
-
-// Intended fixed supply of the mint (1,000,000,000). Shown as a plain fact, never
-// as a price or return promise.
-const TOTAL_SUPPLY = "1,000,000,000";
-
-const GLANCE = [
-  ["Symbol", `$${TOKEN_SYMBOL}`],
-  ["Total supply", TOTAL_SUPPLY],
-  ["Decimals", String(TOKEN_DECIMALS)],
-  ["Network", NETWORK_LABEL],
+// Top-line facts for the stats band. Values are real; nothing here implies price.
+const STATS = [
+  [TOTAL_SUPPLY, `Total Supply · ${TOKEN_SYMBOL}`],
+  [String(DECIMALS), "Decimals"],
+  [NETWORK_LABEL, "Network"],
+  [TOKEN_SYMBOL, "Token"],
 ];
 
+// What PLSX honestly IS today — no hype, no promises.
 const UTILITY = [
-  ["🔒", "Non-custodial", "$PULSE lives in your own wallet. Connecting here only reads your balance — it never moves, holds, or locks your tokens."],
-  ["⚡", "Built on Solana", "A standard SPL token with fast, low-cost transfers. Your balance is read live from the Solana blockchain."],
-  ["🪙", "Fixed supply", "1,000,000,000 $PULSE total. Verify the supply and mint yourself on-chain using the address below."],
-  ["📖", "Utility, not investment", "$PULSE is a utility token — not a security or a promise of profit. Always do your own research."],
+  ["🔒", "Non-custodial", `${TOKEN_SYMBOL} lives in your own wallet. This site only reads your balance — it never moves, holds, or locks your tokens.`],
+  ["⚡", "Built on Solana", "A standard SPL token with fast, low-cost transfers, read live from the Solana blockchain."],
+  ["🪙", "Fixed supply", `${TOTAL_SUPPLY} ${TOKEN_SYMBOL}. Verify the supply and mint yourself on-chain any time.`],
+  ["📖", "Utility, not investment", `${TOKEN_SYMBOL} is a utility token — not a security or a promise of profit. Always do your own research.`],
 ];
 
-const STEPS = [
-  ["Connect your wallet", "Use Phantom or Solflare on Solana. Connecting is read-only — it never moves funds or signs a transaction."],
-  ["Hold $PULSE", "Keep your tokens in your own wallet. Nothing is deposited, staked, or locked up."],
-  ["Check your balance", "Your live on-chain $PULSE balance appears instantly, read straight from the Solana blockchain."],
+// Planned directions — explicitly "Coming Soon", explicitly NOT commitments.
+const UTILITY_SOON = [
+  ["Ecosystem Utility", "Real uses for PLSX are being explored as the ecosystem develops."],
+  ["Community Rewards", "Ways to recognise the community are under exploration — nothing is guaranteed."],
+  ["Governance", "Community input mechanisms may be considered before Mainnet."],
+];
+
+// 4-phase roadmap. Only real completions are marked Completed.
+const ROADMAP = [
+  ["done", "Phase 1", "Token Creation & Devnet Launch", `${TOKEN_SYMBOL} minted on Solana Devnet with a fixed supply and on-chain (Metaplex) metadata.`, "Completed"],
+  ["prog", "Phase 2", "Website & Community", "This site is live and evolving; community channels are being set up.", "In Progress"],
+  ["soon", "Phase 3", "Utility & Ecosystem", "Exploring genuine utility for PLSX. Details will be published before Mainnet.", "Coming Soon"],
+  ["soon", "Phase 4", "Mainnet Launch", "Mainnet deployment with published tokenomics. No date is set yet.", "Coming Soon"],
+];
+
+const DOCS_SOON = [
+  ["📄", "Whitepaper"],
+  ["📚", "Documentation"],
+  ["💻", "GitHub"],
 ];
 
 export default function TokenSitePage() {
-  const configured = isTokenConfigured();
-
   return (
     <>
       <Navbar />
@@ -54,71 +61,55 @@ export default function TokenSitePage() {
       {/* ===================== HERO ===================== */}
       <header className="hero hero-v2" id="top">
         <div className="container">
-          <div className="hero-copy" style={{ maxWidth: 820, margin: "0 auto", textAlign: "center" }}>
+          <div className="hero-copy" style={{ maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
             <span className="pill">
-              <span className="dot"></span> {NETWORK_LABEL} · SPL utility token
+              <span className="dot"></span> DEVNET • TESTING
             </span>
             <h1>
-              $PULSE — a non-custodial token on{" "}
-              <span className="grad">Solana</span>.
+              {PROJECT_NAME} — Built for the{" "}
+              <span className="grad">Next Wave of Solana</span>.
             </h1>
             <p className="sub" style={{ marginInline: "auto" }}>
-              Your keys, your tokens. Connect your Solana wallet to see your{" "}
-              <strong>live on-chain $PULSE balance</strong> — read-only, no signing, no deposits.
+              {PROJECT_NAME} ({TOKEN_SYMBOL}) is a Solana-based token project currently running on{" "}
+              <strong>{NETWORK_LABEL}</strong> while the ecosystem is being developed and tested.
             </p>
             <div className="hero-actions" style={{ justifyContent: "center" }}>
-              <a href="#balance" className="btn btn-primary btn-lg">
-                Connect &amp; check balance →
+              <a href={EXPLORER_TRANSFERS} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-lg">
+                View on Solana Explorer ↗
               </a>
-              <a href="#contract" className="btn btn-ghost btn-lg">
-                Token details
+              <a href="#stats" className="btn btn-ghost btn-lg">
+                Explore {TOKEN_SYMBOL}
               </a>
             </div>
             <p className="hero-note">
-              $PULSE is a utility token, not an investment. Always do your own research.
+              {TOKEN_SYMBOL} is a Devnet testing token with no monetary value. Not financial advice.
             </p>
           </div>
         </div>
       </header>
 
-      {/* ===================== AT A GLANCE ===================== */}
-      <section className="works" aria-label="Token at a glance">
+      {/* ===================== LIVE TOKEN STATS ===================== */}
+      <section className="section" id="stats" style={{ paddingTop: 40 }}>
         <div className="container">
           <Reveal>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                gap: 14,
-              }}
-            >
-              {GLANCE.map(([label, value]) => (
-                <div
-                  key={label}
-                  style={{
-                    background: "var(--bg-elev)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 16,
-                    padding: "18px 20px",
-                    textAlign: "center",
-                  }}
-                >
-                  <div style={{ fontSize: 24, fontWeight: 800, color: "var(--accent-3)" }}>{value}</div>
-                  <div style={{ marginTop: 4, color: "var(--text-mute)", fontSize: 13 }}>{label}</div>
+            <div className="stats-band">
+              {STATS.map(([value, label]) => (
+                <div className="stat" key={label}>
+                  <div className="big" style={{ fontSize: "clamp(20px, 3vw, 32px)", wordBreak: "break-word" }}>{value}</div>
+                  <div className="lbl">{label}</div>
                 </div>
               ))}
             </div>
           </Reveal>
-        </div>
-      </section>
 
-      {/* ===================== YOUR BALANCE (live dApp) ===================== */}
-      <section className="section" id="balance">
-        <div className="container">
-          <Reveal className="section-head">
+          <Reveal style={{ marginTop: 26 }}>
+            <NetworkStatus />
+          </Reveal>
+
+          <Reveal className="section-head" style={{ marginTop: 60, marginBottom: 28 }}>
             <span className="tag">Live</span>
-            <h2>Check your $PULSE.</h2>
-            <p>Connect your Solana wallet to see your live on-chain balance — read-only, no signing, no transaction.</p>
+            <h2>Your {TOKEN_SYMBOL} Balance.</h2>
+            <p>Connect a Solana wallet to read your live on-chain balance — read-only, no signing, no transaction.</p>
           </Reveal>
           <Reveal>
             <BalancePanel />
@@ -126,12 +117,39 @@ export default function TokenSitePage() {
         </div>
       </section>
 
-      {/* ===================== UTILITY ===================== */}
+      {/* ===================== ABOUT PULSE ===================== */}
+      <section className="section" id="about">
+        <div className="container">
+          <Reveal className="section-head">
+            <span className="tag">About</span>
+            <h2>About {PROJECT_NAME}.</h2>
+            <p>A Solana token project being built in the open — honest about exactly where it is today.</p>
+          </Reveal>
+          <Reveal
+            className="brief"
+            style={{
+              maxWidth: 820, margin: "0 auto", textAlign: "center",
+              background: "var(--lx-surface-grad)", border: "1px solid var(--lx-border)",
+              borderRadius: "var(--radius-lg)", boxShadow: "var(--lx-shadow)", padding: "34px 32px",
+            }}
+          >
+            <p style={{ margin: 0 }}>
+              <strong>{PROJECT_NAME}</strong> is the project; <strong>{TOKEN_SYMBOL}</strong> is its token — a
+              standard SPL token on Solana. Right now {TOKEN_SYMBOL} lives on <strong>{NETWORK_LABEL}</strong>,
+              where the team is developing and testing the ecosystem. There is no Mainnet launch, no price, and
+              no trading yet — everything you see here is verifiable on-chain, and anything not finalised is
+              marked <em>Coming Soon</em> rather than invented.
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ===================== PLSX UTILITY ===================== */}
       <section className="section" id="utility">
         <div className="container">
           <Reveal className="section-head">
             <span className="tag">Utility</span>
-            <h2>What $PULSE is.</h2>
+            <h2>What {TOKEN_SYMBOL} is today.</h2>
             <p>A straightforward Solana SPL token. Here&apos;s exactly how it behaves — no hype.</p>
           </Reveal>
           <div className="features why-choose">
@@ -143,164 +161,159 @@ export default function TokenSitePage() {
               </Reveal>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* ===================== HOW IT WORKS ===================== */}
-      <section className="section workflow-section" id="how">
-        <div className="container">
-          <Reveal className="section-head">
-            <span className="tag">How it works</span>
-            <h2>See your $PULSE in seconds.</h2>
-            <p>No account, no sign-up — just your wallet. Fully non-custodial the whole way.</p>
+          <Reveal style={{ textAlign: "center", margin: "48px 0 22px" }}>
+            <h3 style={{ fontSize: 20, marginBottom: 6 }}>Planned directions</h3>
+            <p className="brief" style={{ maxWidth: 560, margin: "0 auto" }}>
+              Being explored as the ecosystem develops. These are <strong>not commitments</strong>.
+            </p>
           </Reveal>
-          <ol className="workflow">
-            {STEPS.map(([title, body], i) => (
-              <Reveal as="li" className="wf-step" key={title}>
-                <span className="wf-dot">{i + 1}</span>
-                <div className="wf-icon">{["🔌", "🪙", "📊"][i]}</div>
+          <div className="soon-grid">
+            {UTILITY_SOON.map(([title, body]) => (
+              <Reveal className="soon-card" key={title}>
+                <span className="soon-badge">Coming Soon</span>
                 <h3>{title}</h3>
                 <p>{body}</p>
               </Reveal>
             ))}
-          </ol>
-          <Reveal style={{ textAlign: "center", marginTop: 28 }}>
-            <a href="#balance" className="btn btn-primary btn-lg">
-              Connect &amp; check balance →
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== TOKENOMICS ===================== */}
+      <section className="section" id="tokenomics">
+        <div className="container">
+          <Reveal className="section-head">
+            <span className="tag">Tokenomics</span>
+            <h2>Supply &amp; allocation.</h2>
+            <p>The total supply is fixed and verifiable on-chain. Allocation is not finalised — no numbers are invented.</p>
+          </Reveal>
+          <Reveal
+            style={{
+              maxWidth: 900, margin: "0 auto",
+              background: "var(--lx-surface-grad)", border: "1px solid var(--lx-border)",
+              borderRadius: "var(--radius-lg)", boxShadow: "var(--lx-shadow)", padding: "34px 32px",
+            }}
+          >
+            <Tokenomics totalSupply={TOTAL_SUPPLY} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ===================== ROADMAP ===================== */}
+      <section className="section" id="roadmap">
+        <div className="container">
+          <Reveal className="section-head">
+            <span className="tag">Roadmap</span>
+            <h2>Where {PROJECT_NAME} is headed.</h2>
+            <p>Honest status only — a phase is &ldquo;Completed&rdquo; solely when it has actually shipped.</p>
+          </Reveal>
+          <div className="roadmap">
+            {ROADMAP.map(([kind, phase, title, body, status]) => (
+              <Reveal className={`rm-phase rm-${kind}`} key={phase}>
+                <div className="rm-head">
+                  <span className="rm-phase-label">{phase}</span>
+                  <span className={`rm-status rm-status-${kind}`}>{status}</span>
+                </div>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== SECURITY & TRANSPARENCY ===================== */}
+      <section className="section" id="security">
+        <div className="container">
+          <Reveal className="section-head">
+            <span className="tag">Security</span>
+            <h2>Security &amp; transparency.</h2>
+            <p>Read live from Solana — not claims. Verify every value yourself on Explorer.</p>
+          </Reveal>
+          <Reveal>
+            <SecurityStatus />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ===================== TOKEN EXPLORER CARD ===================== */}
+      <section className="section" id="explorer" style={{ paddingTop: 0 }}>
+        <div className="container">
+          <Reveal
+            className="explore-card"
+            style={{
+              maxWidth: 720, margin: "0 auto", textAlign: "center",
+              background: "var(--bg-elev)", border: "1px solid var(--border)",
+              borderRadius: 18, padding: "30px 26px",
+            }}
+          >
+            <div style={{ color: "var(--text-mute)", fontSize: 13, marginBottom: 12 }}>
+              {TOKEN_SYMBOL} mint · {NETWORK_LABEL}
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+              <CopyAddress value={MINT_ADDRESS} />
+            </div>
+            <a href={EXPLORER_TRANSFERS} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+              View on Solana Explorer ↗
             </a>
           </Reveal>
         </div>
       </section>
 
-      {/* ===================== CONTRACT / MINT ===================== */}
-      <section className="section" id="contract">
+      {/* ===================== DOCUMENTATION ===================== */}
+      <section className="section" id="docs">
         <div className="container">
           <Reveal className="section-head">
-            <span className="tag">On-chain</span>
-            <h2>Token address.</h2>
-            <p>Always verify you&apos;re holding the official mint before interacting with $PULSE.</p>
+            <span className="tag">Docs</span>
+            <h2>Documentation.</h2>
+            <p>Whitepaper and developer docs are in progress and will be linked here when ready.</p>
           </Reveal>
-
-          <Reveal
-            style={{
-              background: "var(--bg-elev)",
-              border: "1px solid var(--border)",
-              borderRadius: 18,
-              padding: "26px 24px",
-              maxWidth: 720,
-              margin: "0 auto",
-              textAlign: "center",
-            }}
-          >
-            {configured ? (
-              <>
-                <div style={{ color: "var(--text-mute)", fontSize: 13, marginBottom: 10 }}>
-                  {TOKEN_SYMBOL} mint · {NETWORK_LABEL}
-                </div>
-                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
-                  <CopyAddress value={TOKEN_MINT} />
-                </div>
-                <a
-                  href={explorerUrl(TOKEN_MINT, "address")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost btn-sm"
-                >
-                  View on Solana Explorer ↗
-                </a>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: 40, marginBottom: 10 }} aria-hidden="true">🚀</div>
-                <h3 style={{ margin: "0 0 8px" }}>Launching soon</h3>
-                <p className="brief" style={{ margin: 0 }}>
-                  The official $PULSE mint address will appear here once the token goes live on{" "}
-                  {NETWORK_LABEL}. Until then, ignore any address claiming to be $PULSE.
-                </p>
-              </>
-            )}
-          </Reveal>
+          <div className="soon-grid">
+            {DOCS_SOON.map(([icon, title]) => (
+              <Reveal className="soon-card" key={title}>
+                <span className="soon-badge">Coming Soon</span>
+                <div className="soon-ic" aria-hidden="true">{icon}</div>
+                <h3>{title}</h3>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ===================== WHERE TO GET IT ===================== */}
-      <section className="section" id="get">
+      {/* ===================== COMMUNITY ===================== */}
+      <section className="section" id="community">
         <div className="container">
           <Reveal className="section-head">
-            <span className="tag">Where to get it</span>
-            <h2>Getting $PULSE.</h2>
+            <span className="tag">Community</span>
+            <h2>Join the community.</h2>
           </Reveal>
           <Reveal
             className="brief"
             style={{
-              maxWidth: 720,
-              margin: "0 auto",
-              textAlign: "center",
-              background: "var(--bg-elev)",
-              border: "1px solid var(--border)",
-              borderRadius: 16,
-              padding: "22px 24px",
+              maxWidth: 640, margin: "0 auto", textAlign: "center",
+              background: "var(--bg-elev)", border: "1px solid var(--border)",
+              borderRadius: 16, padding: "30px 26px",
             }}
           >
-            {IS_MAINNET ? (
-              <p style={{ margin: 0 }}>
-                Once liquidity is live, you&apos;ll be able to swap for $PULSE on Solana DEXes.
-                Only ever buy against the official mint address shown above.
-              </p>
-            ) : (
-              <p style={{ margin: 0 }}>
-                $PULSE is currently on <strong>{NETWORK_LABEL}</strong> for testing — it has{" "}
-                <strong>no monetary value</strong> and isn&apos;t for sale. On-chain trading and
-                price will go live when $PULSE launches on Solana mainnet.
-              </p>
-            )}
+            <div style={{ fontSize: 34, marginBottom: 10 }} aria-hidden="true">🌐</div>
+            <p style={{ margin: 0 }}>
+              Community links coming soon. Official channels will be published here — until then, be cautious of
+              any account or group claiming to represent {PROJECT_NAME}.
+            </p>
           </Reveal>
         </div>
       </section>
 
-      {/* ===================== THE HONEST BIT ===================== */}
-      <section className="section">
+      {/* ===================== FAQ ===================== */}
+      <section className="section" id="faq">
         <div className="container">
-          <Reveal
-            style={{
-              maxWidth: 860,
-              margin: "0 auto",
-              background: "var(--bg-elev)",
-              border: "1px solid var(--border)",
-              borderRadius: 18,
-              padding: "26px 28px",
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>The honest bit</h3>
-            <ul className="pulse-points" style={{ marginBottom: 0 }}>
-              <li>$PULSE is a <strong>utility token</strong>, not a security, share, or investment product.</li>
-              <li>Nothing here is financial advice. Always <strong>do your own research</strong> before interacting with any token.</li>
-              <li>It&apos;s <strong>non-custodial</strong> — this site only reads your balance; it never takes, holds, or locks your tokens.</li>
-              <li>On devnet, $PULSE is for testing only and has no monetary value.</li>
-            </ul>
+          <Reveal className="section-head">
+            <span className="tag">FAQ</span>
+            <h2>Frequently asked questions.</h2>
           </Reveal>
-        </div>
-      </section>
-
-      {/* ===================== FINAL CTA ===================== */}
-      <section className="section">
-        <div className="container">
-          <Reveal className="cta-band final-cta">
-            <h2>See your $PULSE balance.</h2>
-            <p>Connect your Solana wallet — it takes a few seconds and never moves your funds.</p>
-            <div className="final-cta-actions">
-              <a href="#balance" className="btn btn-primary btn-lg">Connect &amp; check balance →</a>
-              {configured ? (
-                <a
-                  href={explorerUrl(TOKEN_MINT, "address")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost btn-lg"
-                >
-                  View the mint ↗
-                </a>
-              ) : null}
-            </div>
+          <Reveal style={{ maxWidth: 780, margin: "0 auto" }}>
+            <FAQ />
           </Reveal>
         </div>
       </section>
@@ -312,35 +325,40 @@ export default function TokenSitePage() {
             <div className="footer-brand">
               <a href="#top" className="logo">
                 <span className="logo-mark" aria-hidden="true" />
-                <span className="wordmark"><span className="wm-fy">$</span>PULSE</span>
+                <span className="wordmark">{PROJECT_NAME}</span>
               </a>
-              <p>A non-custodial utility token on Solana. Your keys, your tokens.</p>
+              <p>A Solana token project ({TOKEN_SYMBOL}), currently on {NETWORK_LABEL}. Your keys, your tokens.</p>
             </div>
             <div className="footer-col">
-              <h4>$PULSE</h4>
+              <h4>Project</h4>
+              <a href="#about">About</a>
+              <a href="#tokenomics">Tokenomics</a>
+              <a href="#roadmap">Roadmap</a>
+              <a href="#security">Security</a>
+            </div>
+            <div className="footer-col">
+              <h4>Token</h4>
+              <a href="#stats">Your balance</a>
               <a href="#utility">Utility</a>
-              <a href="#how">How it works</a>
-              <a href="#balance">Your balance</a>
-              <a href="#contract">Token address</a>
+              <a href="#faq">FAQ</a>
+              <a href="#docs">Docs</a>
             </div>
             <div className="footer-col">
               <h4>On-chain</h4>
-              {configured ? (
-                <a href={explorerUrl(TOKEN_MINT, "address")} target="_blank" rel="noopener noreferrer">
-                  View mint ↗
-                </a>
-              ) : null}
-              <a href="https://explorer.solana.com" target="_blank" rel="noopener noreferrer">
-                Solana Explorer ↗
-              </a>
-              <a href="https://solana.com" target="_blank" rel="noopener noreferrer">
-                About Solana ↗
-              </a>
+              <a href={EXPLORER_TRANSFERS} target="_blank" rel="noopener noreferrer">View mint ↗</a>
+              <a href="https://explorer.solana.com" target="_blank" rel="noopener noreferrer">Solana Explorer ↗</a>
+              <a href="https://solana.com" target="_blank" rel="noopener noreferrer">About Solana ↗</a>
             </div>
           </div>
+
+          <div className="risk-disclaimer">
+            <strong>Risk Disclaimer.</strong> {TOKEN_SYMBOL} is currently a Devnet testing token. It has no
+            intended monetary value on Devnet. Nothing on this website constitutes financial or investment advice.
+          </div>
+
           <div className="footer-bottom">
-            <span>© 2026 $PULSE.</span>
-            <span>$PULSE is a utility token, not an investment.</span>
+            <span>© 2026 {PROJECT_NAME}.</span>
+            <span>{PROJECT_NAME} — {TOKEN_SYMBOL} · {NETWORK_LABEL}</span>
           </div>
         </div>
       </footer>

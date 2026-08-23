@@ -9,23 +9,15 @@ import {
   isTokenConfigured,
   explorerUrl,
   shortAddress,
-  TOKEN_SYMBOL,
-  NETWORK,
 } from "@/lib/solana";
-
-const NETWORK_LABEL =
-  NETWORK === "mainnet-beta"
-    ? "Solana Mainnet"
-    : NETWORK === "devnet"
-    ? "Solana Devnet"
-    : `Solana ${NETWORK.charAt(0).toUpperCase()}${NETWORK.slice(1)}`;
+import { TOKEN_SYMBOL, NETWORK_LABEL } from "@/lib/config";
 
 const panelStyle = { maxWidth: 720, margin: "0 auto" };
 
 /**
- * The core of this site: connect a Solana wallet and show its LIVE on-chain
- * $PULSE balance — a pure client-side RPC read. Nothing is stored, no backend
- * is called, and connecting never signs a transaction or moves any funds.
+ * The live dApp core: connect a Solana wallet and show its LIVE on-chain PLSX
+ * balance — a pure client-side RPC read. Nothing is stored, no backend is
+ * called, and connecting never signs a transaction or moves any funds.
  */
 export default function BalancePanel() {
   const { publicKey, connected } = useWallet();
@@ -68,7 +60,7 @@ export default function BalancePanel() {
     return (
       <div className="panel" style={panelStyle}>
         <div className="panel-head">
-          <h3 style={{ margin: 0 }}>Your ${TOKEN_SYMBOL}</h3>
+          <h3 style={{ margin: 0 }}>Your {TOKEN_SYMBOL} Balance</h3>
         </div>
         <p className="brief" style={{ margin: 0 }}>Loading wallet…</p>
       </div>
@@ -79,10 +71,10 @@ export default function BalancePanel() {
     return (
       <div className="panel" style={panelStyle}>
         <div className="panel-head">
-          <h3 style={{ margin: 0 }}>Your ${TOKEN_SYMBOL}</h3>
+          <h3 style={{ margin: 0 }}>Your {TOKEN_SYMBOL} Balance</h3>
         </div>
         <p className="brief" style={{ margin: 0 }}>
-          $PULSE isn&apos;t live yet. Once the mint is configured, connect your wallet here to
+          {TOKEN_SYMBOL} isn&apos;t live yet. Once the mint is configured, connect your wallet here to
           see your live on-chain balance.
         </p>
       </div>
@@ -95,26 +87,26 @@ export default function BalancePanel() {
         className="panel-head"
         style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
       >
-        <h3 style={{ margin: 0 }}>Your ${TOKEN_SYMBOL} balance</h3>
+        <h3 style={{ margin: 0 }}>Your {TOKEN_SYMBOL} Balance</h3>
         <span className="tag-pill" style={{ color: "var(--text-mute)", fontSize: 13 }}>{NETWORK_LABEL}</span>
       </div>
 
       {!connected ? (
         <div style={{ textAlign: "center", padding: "18px 0" }}>
           <p className="brief" style={{ marginTop: 0 }}>
-            Connect a Solana wallet to see your live on-chain $PULSE balance. It&apos;s read-only —
+            Connect a Solana wallet to see your live on-chain {TOKEN_SYMBOL} balance. It&apos;s read-only —
             connecting never moves funds or signs a transaction.
           </p>
-          <WalletConnectButton className="btn btn-primary btn-lg" />
+          <WalletConnectButton className="btn btn-green btn-lg" />
         </div>
       ) : (
         <>
-          <div className="kpis" style={{ marginTop: 14 }}>
+          <div className="kpis" style={{ marginTop: 14, gridTemplateColumns: "repeat(2, 1fr)" }}>
             <div className="kpi">
               <div className="k-top"><span className="k-ic">🪙</span></div>
               <div className="k-val">
                 {loading ? "…" : balance != null ? formatTokensPretty(balance) : "0"}{" "}
-                <span style={{ fontSize: 14, color: "var(--text-mute)" }}>${TOKEN_SYMBOL}</span>
+                <span style={{ fontSize: 14, color: "var(--text-mute)" }}>{TOKEN_SYMBOL}</span>
               </div>
               <div className="k-lbl">On-chain balance</div>
             </div>

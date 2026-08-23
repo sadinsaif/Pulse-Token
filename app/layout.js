@@ -2,12 +2,33 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import WaveBackground from "@/components/WaveBackground";
 
-const TOKEN_SYMBOL = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || "PULSE";
+const SITE_URL = "https://pulse-token-six.vercel.app";
 
 export const metadata = {
-  title: `$${TOKEN_SYMBOL} — a Solana utility token`,
+  metadataBase: new URL(SITE_URL),
+  title: "PULSE — PLSX | Solana Token",
   description:
-    "$PULSE is a non-custodial Solana SPL utility token. Connect your Solana wallet to see your live on-chain $PULSE balance — read-only, no signing, no deposits. A utility token, not an investment.",
+    "PULSE (PLSX) is a Solana-based token project currently running on Devnet while the ecosystem is being developed and tested.",
+  icons: {
+    icon: "/token/logo.png",
+    apple: "/token/logo.png",
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    title: "PULSE — PLSX | Solana Token",
+    description:
+      "PULSE (PLSX) is a Solana-based token project currently running on Devnet while the ecosystem is being developed and tested.",
+    siteName: "PULSE",
+    images: [{ url: "/token/logo.png", width: 512, height: 512, alt: "PULSE (PLSX)" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "PULSE — PLSX | Solana Token",
+    description:
+      "PULSE (PLSX) is a Solana-based token project currently running on Devnet while the ecosystem is being developed and tested.",
+    images: ["/token/logo.png"],
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -15,16 +15,16 @@
   --text-dim:    #a2a8b4;
   --text-mute:   #6b7280;
 
-  --accent:      #ff7a45;   /* sunset orange */
-  --accent-2:    #a855f7;   /* violet */
-  --accent-3:    #ffb43a;   /* amber */
+  --accent:      #3ee0a0;   /* emerald — PRIMARY brand accent (Solana green) */
+  --accent-2:    #a855f7;   /* violet — secondary pop */
+  --accent-3:    #7bf0c0;   /* light mint — gradient partner for --accent */
   --danger:      #f4526a;
   --warn:        #f6c453;
   --ok:          #4ade80;
 
-  /* accent tints (used in place of old hardcoded lime rgba) */
-  --accent-soft: rgba(255,122,69,.10);
-  --accent-line: rgba(255,122,69,.22);
+  /* accent tints (green, matching the primary emerald accent) */
+  --accent-soft: rgba(62,224,160,.10);
+  --accent-line: rgba(62,224,160,.26);
 
   /* emerald glow tints — echo the animated backdrop for hover/active polish */
   --glow-green:      rgba(74,222,150,.28);
@@ -181,7 +181,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   color: #0a0b0d;
 }
 .btn-primary:hover {
-  box-shadow: 0 10px 34px -8px rgba(255,122,69,.55);
+  box-shadow: 0 10px 34px -8px rgba(62,224,160,.55);
   transform: translateY(-2px) scale(1.02);
   filter: brightness(1.03);
 }
@@ -238,13 +238,13 @@ button { font-family: inherit; cursor: pointer; border: none; }
    marketing surface only. */
 .nav .btn-primary,
 .container .btn-primary {
-  background: linear-gradient(180deg, #ff9159 0%, #ff6a2e 100%);
-  color: #140a05;
-  box-shadow: var(--lx-glow-warm-in), 0 10px 28px -14px rgba(255,122,69,.5);
+  background: linear-gradient(180deg, #54e9b0 0%, #25c98e 100%);
+  color: #04140d;
+  box-shadow: var(--lx-glow-warm-in), 0 10px 28px -14px var(--accent-green-glow);
 }
 .nav .btn-primary:hover,
 .container .btn-primary:hover {
-  box-shadow: 0 1px 0 rgba(255,255,255,.26) inset, 0 18px 40px -12px rgba(255,122,69,.62);
+  box-shadow: 0 1px 0 rgba(255,255,255,.26) inset, 0 18px 40px -12px rgba(37,201,142,.62);
   transform: translateY(-2px) scale(1.02);
   filter: brightness(1.04) saturate(1.04);
 }
@@ -269,7 +269,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .nav .btn-primary:focus-visible,
 .container .btn-primary:focus-visible {
   box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent),
-    0 10px 28px -14px rgba(255, 122, 69, .5);
+    0 10px 28px -14px var(--accent-green-glow);
 }
 
 /* Marketing GREEN CTA — the brand's emerald as a solid action button, used
@@ -396,7 +396,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   position: absolute;
   bottom: -170px; right: 6%;
   width: 560px; height: 560px;
-  background: radial-gradient(circle, rgba(255,150,70,.16), transparent 66%);
+  background: radial-gradient(circle, rgba(62,224,160,.16), transparent 66%);
   filter: blur(10px);
   z-index: 0;
   pointer-events: none;
@@ -544,7 +544,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   display: grid; place-items: center;
   font-size: 24px;
   margin-bottom: 18px;
-  background: linear-gradient(180deg, rgba(255,122,69,.16), rgba(255,122,69,.05));
+  background: linear-gradient(180deg, rgba(62,224,160,.16), rgba(62,224,160,.05));
   border: 1px solid var(--accent-line);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
 }
@@ -3461,3 +3461,174 @@ tbody tr:last-child td { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
   .cf-chip, .cf-drop { transition: none !important; }
 }
+
+/* ============================================================
+   PULSE (PLSX) token site — upgrade layer.
+   New, self-contained blocks for the professional multi-section
+   site: network status, "coming soon" cards, roadmap, on-chain
+   security rows, tokenomics facts, FAQ accordion, risk disclaimer.
+   All colours from the (now green) accent tokens. Additive only.
+   ============================================================ */
+
+/* ---- Network status badge ---- */
+.netstat {
+  display: flex; align-items: center; gap: 14px;
+  max-width: 720px; margin: 0 auto;
+  padding: 14px 18px; border-radius: var(--radius);
+  background: var(--lx-surface-grad); border: 1px solid var(--lx-border);
+  box-shadow: var(--lx-shadow);
+}
+.netstat-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: none;
+  background: var(--accent-green);
+  box-shadow: 0 0 0 4px var(--accent-green-soft), 0 0 12px var(--accent-green);
+  animation: lxPulseDot 2.4s var(--ease) infinite;
+}
+.netstat-dot.is-test { background: var(--warn); box-shadow: 0 0 0 4px rgba(246,196,83,.14), 0 0 12px rgba(246,196,83,.7); }
+.netstat-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.netstat-body strong { font-size: 15px; }
+.netstat-body span { font-size: 13px; color: var(--lx-text-mute); }
+.netstat-badge {
+  flex: none; font-family: var(--font-display); font-weight: 800; font-size: 12px;
+  letter-spacing: .1em; padding: 6px 12px; border-radius: 999px;
+  color: var(--warn); background: rgba(246,196,83,.10); border: 1px solid rgba(246,196,83,.32);
+}
+.netstat-badge.is-live { color: var(--accent-green); background: var(--accent-green-soft); border-color: var(--accent-green-line); }
+
+/* ---- "Coming Soon" cards (utility + docs) ---- */
+.soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.soon-card {
+  position: relative; text-align: center;
+  padding: 30px 24px 26px; border-radius: var(--radius);
+  background: var(--lx-surface-grad); border: 1px dashed var(--lx-border);
+  box-shadow: var(--lx-shadow);
+}
+.soon-badge {
+  display: inline-block; font-family: var(--font-display); font-weight: 700;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent-green); background: var(--accent-green-soft);
+  border: 1px solid var(--accent-green-line); border-radius: 999px;
+  padding: 4px 12px; margin-bottom: 14px;
+}
+.soon-ic { font-size: 28px; margin: 6px 0 10px; }
+.soon-card h3 { font-size: 17px; margin-bottom: 8px; }
+.soon-card p { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+/* ---- Roadmap ---- */
+.roadmap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.rm-phase {
+  position: relative; padding: 26px 22px; border-radius: var(--radius);
+  background: var(--lx-surface-grad); border: 1px solid var(--lx-border);
+  box-shadow: var(--lx-shadow); overflow: hidden;
+  transition: transform var(--t-med) var(--ease), border-color var(--t-med), box-shadow var(--t-med);
+}
+.rm-phase::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+  background: var(--lx-border);
+}
+.rm-phase.rm-done::before { background: linear-gradient(180deg, #54e9b0, #25c98e); }
+.rm-phase.rm-prog::before { background: linear-gradient(180deg, #7bf0c0, #3ee0a0); }
+.rm-phase.rm-soon::before { background: var(--accent-2); opacity: .6; }
+.rm-phase:hover { transform: translateY(-5px); border-color: var(--accent-green-line); box-shadow: var(--lx-shadow-hover); }
+.rm-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.rm-phase-label {
+  font-family: var(--font-display); font-weight: 800; font-size: 12px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--text-mute);
+}
+.rm-status {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.rm-status-done { color: #04140d; background: linear-gradient(180deg,#54e9b0,#25c98e); }
+.rm-status-prog { color: var(--accent-green); background: var(--accent-green-soft); border: 1px solid var(--accent-green-line); }
+.rm-status-soon { color: var(--text-dim); background: rgba(255,255,255,.04); border: 1px solid var(--lx-border); }
+.rm-phase h3 { font-size: 16px; margin-bottom: 8px; letter-spacing: -.01em; }
+.rm-phase p { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+
+/* ---- Security & transparency rows ---- */
+.sec-panel { padding: 12px 24px 24px; }
+.sec-grid { display: flex; flex-direction: column; }
+.sec-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 15px 2px; border-bottom: 1px solid var(--lx-border);
+}
+.sec-row:last-child { border-bottom: none; }
+.sec-label { color: var(--text-mute); font-size: 13.5px; font-weight: var(--fw-medium); flex: none; }
+.sec-value { font-size: 14.5px; text-align: right; font-weight: var(--fw-semibold); }
+.sec-value.sec-muted { color: var(--lx-text-mute); font-weight: var(--fw-regular); }
+.sec-sym { color: var(--text-mute); font-style: normal; font-weight: var(--fw-medium); font-size: 13px; }
+.sec-addr { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.sec-link { color: var(--accent-green); font-weight: 600; }
+.sec-link:hover { text-decoration: underline; }
+.sec-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; padding: 5px 11px; border-radius: 999px;
+}
+.sec-pill .sec-dot { width: 7px; height: 7px; border-radius: 50%; }
+.sec-pill.is-active { color: var(--warn); background: rgba(246,196,83,.10); border: 1px solid rgba(246,196,83,.30); }
+.sec-pill.is-active .sec-dot { background: var(--warn); }
+.sec-pill.is-revoked { color: var(--accent-green); background: var(--accent-green-soft); border: 1px solid var(--accent-green-line); }
+.sec-pill.is-revoked .sec-dot { background: var(--accent-green); }
+.sec-foot { margin-top: 16px; font-size: 12.5px; color: var(--lx-text-mute); line-height: 1.6; }
+
+/* ---- Tokenomics facts ---- */
+.tokenomics { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.tokenomics .donut-wrap { justify-content: center; }
+.tk-facts { display: flex; flex-direction: column; gap: 18px; }
+.tk-fact { display: flex; flex-direction: column; gap: 4px; }
+.tk-fact-label { font-size: 12.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-mute); font-weight: 700; }
+.tk-fact-val { font-family: var(--font-display); font-size: clamp(24px, 3vw, 34px); font-weight: 800; letter-spacing: -.02em; }
+.tk-fact-val em { font-style: normal; font-size: 15px; color: var(--text-mute); font-weight: 600; }
+.tk-note { font-size: 13.5px; color: var(--lx-text-mute); line-height: 1.6; }
+
+/* ---- FAQ accordion ---- */
+.faq { display: flex; flex-direction: column; gap: 12px; }
+.faq-item {
+  border: 1px solid var(--lx-border); border-radius: var(--radius);
+  background: var(--lx-surface-grad); box-shadow: var(--lx-shadow);
+  overflow: hidden; transition: border-color var(--t-med) var(--ease);
+}
+.faq-item.open { border-color: var(--accent-green-line); }
+.faq-q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; background: transparent; color: var(--text);
+  font-family: var(--font-display); font-weight: var(--fw-semibold); font-size: 16px; text-align: left;
+}
+.faq-q:hover { color: var(--accent-green); }
+.faq-q:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--accent-green-line); }
+.faq-chev {
+  flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+  font-size: 20px; line-height: 1; color: var(--accent-green);
+  border: 1px solid var(--accent-green-line); border-radius: 8px;
+}
+.faq-a { padding: 0 22px 20px; }
+.faq-a p { color: var(--text-dim); font-size: 14.5px; line-height: 1.7; margin: 0; }
+
+/* ---- Risk disclaimer ---- */
+.risk-disclaimer {
+  margin: 8px 0 28px; padding: 18px 22px; border-radius: var(--radius);
+  background: rgba(246,196,83,.06); border: 1px solid rgba(246,196,83,.24);
+  color: var(--text-dim); font-size: 13.5px; line-height: 1.7;
+}
+.risk-disclaimer strong { color: var(--warn); }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .roadmap { grid-template-columns: repeat(2, 1fr); }
+  .soon-grid { grid-template-columns: 1fr; }
+  .tokenomics { grid-template-columns: 1fr; gap: 28px; text-align: center; }
+  .tokenomics .donut-wrap { flex-direction: column; }
+  .tk-facts { align-items: center; }
+}
+@media (max-width: 560px) {
+  .roadmap { grid-template-columns: 1fr; }
+  .sec-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .sec-value { text-align: left; }
+  .sec-addr { justify-content: flex-start; }
+  .netstat { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rm-phase, .faq-item, .soon-card { transition: none !important; }
+  .netstat-dot { animation: none !important; }
+}
+

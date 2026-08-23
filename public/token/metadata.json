@@ -1,7 +1,7 @@
 {
   "name": "PULSE",
-  "symbol": "PULSE",
-  "description": "$PULSE is a non-custodial Solana SPL utility token. Connect your Solana wallet to see your live on-chain balance — read-only, no signing, no deposits. A utility token, not an investment.",
+  "symbol": "PLSX",
+  "description": "PULSE (PLSX) is a Solana-based token project currently running on Devnet while the ecosystem is being developed and tested. Non-custodial: connect your wallet to read your live on-chain balance. A utility token, not an investment.",
   "image": "https://pulse-token-six.vercel.app/token/logo.png",
   "external_url": "https://pulse-token-six.vercel.app",
   "properties": {
