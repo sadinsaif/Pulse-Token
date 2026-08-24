@@ -8,13 +8,13 @@ import NetworkSelector from "@/components/NetworkSelector";
 import BalancePanel from "@/components/BalancePanel";
 import SolBalance from "@/components/SolBalance";
 import TestSolFaucet from "@/components/TestSolFaucet";
-import DefiCard from "@/components/DefiCard";
+import DefiGrid from "@/components/DefiGrid";
 import TxSafetyNote from "@/components/TxSafetyNote";
 import WalletConnectButton from "@/components/WalletConnectButton";
 import { useNetwork } from "@/components/NetworkProvider";
 import { shortAddress, explorerUrlFor } from "@/lib/solana";
 import { TOKEN_SYMBOL } from "@/lib/config";
-import { TESTNET_CONFIG, DEFI_FEATURES } from "@/config/networks";
+import { TESTNET_CONFIG } from "@/config/networks";
 
 // "PLSX Testnet Playground" — the advanced-feature staging environment.
 //
@@ -150,13 +150,7 @@ export default function TestnetPage() {
               each is honestly <strong>Coming Soon</strong> — no simulated swaps, rewards, or balances.
             </p>
           </Reveal>
-          <div className="soon-grid defi-grid">
-            {DEFI_FEATURES.map((f) => (
-              <Reveal key={f.key}>
-                <DefiCard icon={f.icon} title={f.title} blurb={f.blurb} />
-              </Reveal>
-            ))}
-          </div>
+          <DefiGrid pinnedNetwork={NET} />
         </div>
       </section>
 

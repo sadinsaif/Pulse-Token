@@ -4,10 +4,9 @@ import NetworkSelector from "@/components/NetworkSelector";
 import EcosystemStatus from "@/components/EcosystemStatus";
 import BalancePanel from "@/components/BalancePanel";
 import SolBalance from "@/components/SolBalance";
-import DefiCard from "@/components/DefiCard";
+import DefiGrid from "@/components/DefiGrid";
 import TxSafetyNote from "@/components/TxSafetyNote";
 import { PROJECT_NAME, TOKEN_SYMBOL } from "@/lib/config";
-import { DEFI_FEATURES } from "@/config/networks";
 
 export const metadata = {
   title: "PULSE Ecosystem — PLSX | Solana",
@@ -92,13 +91,7 @@ export default function EcosystemPage() {
               marked <strong>Coming Soon</strong>. We never show fake prices, APY, TVL, or transactions.
             </p>
           </Reveal>
-          <div className="soon-grid defi-grid">
-            {DEFI_FEATURES.map((f) => (
-              <Reveal key={f.key}>
-                <DefiCard icon={f.icon} title={f.title} blurb={f.blurb} />
-              </Reveal>
-            ))}
-          </div>
+          <DefiGrid />
         </div>
       </section>
 
