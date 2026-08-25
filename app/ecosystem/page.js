@@ -11,15 +11,15 @@ import { PROJECT_NAME, TOKEN_SYMBOL } from "@/lib/config";
 export const metadata = {
   title: "PULSE Ecosystem — PLSX | Solana",
   description:
-    "The PULSE (PLSX) ecosystem dashboard across Solana Devnet, Testnet, and Mainnet. Connect a wallet to read your live balances. DeFi features are clearly marked Coming Soon.",
+    "The PULSE (PLSX) ecosystem dashboard across Solana Devnet, Testnet, and Mainnet. Connect a wallet to read your live balances and stake PLSX on Devnet. Other DeFi features are clearly marked Coming Soon.",
 };
 
 // "PULSE ECOSYSTEM" — the premium multi-network dashboard.
 //
 // Everything here is honest: live PLSX + SOL balances (real RPC reads), a network
-// selector (Devnet/Testnet selectable, Mainnet Coming Soon), and DeFi cards that
-// are ALL "Coming Soon" because no on-chain program is integrated. No prices,
-// APY, TVL, or fake transactions anywhere.
+// selector (Devnet/Testnet selectable, Mainnet Coming Soon), real on-chain PLSX
+// staking on Devnet, and honest "Coming Soon" cards for every feature not yet
+// integrated. No prices, APY, TVL, or fake transactions anywhere.
 export default function EcosystemPage() {
   return (
     <>
@@ -87,8 +87,9 @@ export default function EcosystemPage() {
             <span className="tag">DeFi</span>
             <h2>Ecosystem features.</h2>
             <p>
-              These require on-chain program integrations that aren&apos;t deployed yet, so each is honestly
-              marked <strong>Coming Soon</strong>. We never show fake prices, APY, TVL, or transactions.
+              Live features connect to real, on-chain programs — PLSX <strong>staking</strong> is live on
+              Devnet. Anything not yet integrated stays honestly marked <strong>Coming Soon</strong>. We never
+              show fake prices, APY, TVL, or transactions.
             </p>
           </Reveal>
           <DefiGrid />

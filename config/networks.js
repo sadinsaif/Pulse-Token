@@ -42,7 +42,11 @@ export const DEVNET_CONFIG = {
     faucetSol: true, // real requestAirdrop (public faucet)
     faucetToken: false, // no PLSX faucet — needs a controlled mint authority
     swap: false,
-    stake: false,
+    // ✅ LIVE (Devnet only): the real Anchor staking pool is deployed, funded, and
+    // on-chain-verified (program 52J8…, pool 5PTsh1Hn…, reward vault funded 5000
+    // PLSX, reward_rate 3171). Testnet/Mainnet keep stake:false — no PLSX exists
+    // there, so DefiGrid (features.stake && network.mint) keeps them Coming Soon.
+    stake: true,
     lend: false,
     borrow: false,
     liquidity: false,
