@@ -26,18 +26,12 @@ import {
   estimateClaimable,
 } from "@/lib/staking";
 
-const panelStyle = { maxWidth: 720, margin: "0 auto" };
+const panelStyle = { maxWidth: 560, margin: "0 auto" };
 
-// A small "link-like" button for the Max helpers — no dependency on a CSS class.
-const maxBtnStyle = {
-  background: "none",
-  border: "none",
-  padding: 0,
-  font: "inherit",
-  color: "var(--green, #22c55e)",
-  cursor: "pointer",
-  textDecoration: "underline",
-};
+// The real PULSE token mark shipped at public/token/logo.png (the same mark the
+// navbar uses) — no invented glyph. Staking has a single asset, so the pill is
+// static (nothing to flip to).
+const PLSX_MARK = <img src="/token/logo.png" alt="" width={26} height={26} />;
 
 // A short, human-friendly message from a thrown wallet/RPC error.
 function prettyError(e) {
@@ -56,6 +50,12 @@ function prettyError(e) {
  *
  * Only ever mounted when network.features.stake is true (see DefiGrid), i.e. on a
  * network where the pool is deployed + funded + verified.
+ *
+ * The layout matches the swap dashboard's Across-style look (big amount card, a
+ * PLSX pill, a full-width primary CTA + secondary actions); the visuals live in
+ * the `.swapx-*` / `.stakex-*` blocks of globals.css. All logic below the render
+ * boundary is unchanged — reserves, APR, "earned", and the signed actions all
+ * come straight from the real on-chain state.
  */
 export default function StakePanel({ network: pinned }) {
   const ctx = useNetwork();
@@ -165,8 +165,8 @@ export default function StakePanel({ network: pinned }) {
   // ── render ────────────────────────────────────────────────────────────────
   if (!mounted) {
     return (
-      <div className="panel" style={panelStyle}>
-        <div className="panel-head"><h3 style={{ margin: 0 }}>Stake {TOKEN_SYMBOL}</h3></div>
+      <div className="panel swapx-panel stakex-panel" style={panelStyle}>
+        <div className="panel-head swapx-head"><h3 style={{ margin: 0 }}>Stake {TOKEN_SYMBOL}</h3></div>
         <p className="brief" style={{ margin: 0 }}>Loading…</p>
       </div>
     );
@@ -179,32 +179,10 @@ export default function StakePanel({ network: pinned }) {
   const anyBusy = busy != null;
 
   return (
-    <div className="panel" style={panelStyle}>
-      <div
-        className="panel-head"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
-      >
+    <div className="panel swapx-panel stakex-panel" style={panelStyle}>
+      <div className="panel-head swapx-head">
         <h3 style={{ margin: 0 }}>Stake {TOKEN_SYMBOL}</h3>
         <span className={`tag-pill tone-${network.tone}`}>{network.short}</span>
-      </div>
-
-      {/* Pool stats — all real on-chain values */}
-      <div className="kpis" style={{ marginTop: 14, gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">🔒</span></div>
-          <div className="k-val">{formatTokensPretty(pool?.totalStaked ?? 0n)}</div>
-          <div className="k-lbl">Total staked</div>
-        </div>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">🎁</span></div>
-          <div className="k-val">{formatTokensPretty(rewardVaultBal)}</div>
-          <div className="k-lbl">Reward vault</div>
-        </div>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">📈</span></div>
-          <div className="k-val">{rewardRate > 0n ? `≈ ${apr.toFixed(1)}%` : "Paused"}</div>
-          <div className="k-lbl">Est. APR{rewardRate > 0n ? " (on-chain rate)" : " (0 rate)"}</div>
-        </div>
       </div>
 
       {!enabled ? (
@@ -215,81 +193,147 @@ export default function StakePanel({ network: pinned }) {
         <p className="brief" style={{ marginTop: 14 }}>
           The staking pool isn&apos;t initialized on-chain yet. <strong>Coming Soon.</strong>
         </p>
-      ) : !connected ? (
-        <div style={{ textAlign: "center", padding: "18px 0 6px" }}>
-          <p className="brief" style={{ marginTop: 0 }}>
-            Connect your Solana wallet to stake {TOKEN_SYMBOL}. Every stake, unstake, and claim is signed by
-            your own wallet — nothing is stored here.
-          </p>
-          <WalletConnectButton className="btn btn-green btn-lg" />
-        </div>
       ) : (
         <>
-          {/* Your position */}
-          <div className="kpis" style={{ marginTop: 12, gridTemplateColumns: "repeat(3, 1fr)" }}>
-            <div className="kpi">
-              <div className="k-top"><span className="k-ic">👛</span></div>
-              <div className="k-val">{formatTokensPretty(walletBal)}</div>
-              <div className="k-lbl">Wallet</div>
+          {/* Pool stats — all real on-chain values */}
+          <div className="stakex-stats">
+            <div className="stakex-stat">
+              <span className="stakex-stat-lbl">Total staked</span>
+              <span className="stakex-stat-val">
+                {formatTokensPretty(pool?.totalStaked ?? 0n)}<i>{TOKEN_SYMBOL}</i>
+              </span>
             </div>
-            <div className="kpi">
-              <div className="k-top"><span className="k-ic">🔒</span></div>
-              <div className="k-val">{formatTokensPretty(staked)}</div>
-              <div className="k-lbl">Your stake</div>
+            <div className="stakex-stat">
+              <span className="stakex-stat-lbl">Reward vault</span>
+              <span className="stakex-stat-val">
+                {formatTokensPretty(rewardVaultBal)}<i>{TOKEN_SYMBOL}</i>
+              </span>
             </div>
-            <div className="kpi">
-              <div className="k-top"><span className="k-ic">✨</span></div>
-              <div className="k-val">{formatTokensPretty(earned)}</div>
-              <div className="k-lbl">Earned (live est.)</div>
+            <div className="stakex-stat">
+              <span className="stakex-stat-lbl">{rewardRate > 0n ? "Est. APR (on-chain rate)" : "Est. APR (0 rate)"}</span>
+              <span className={`stakex-stat-val${rewardRate > 0n ? " accent" : ""}`}>
+                {rewardRate > 0n ? `≈ ${apr.toFixed(1)}%` : "Paused"}
+              </span>
             </div>
           </div>
 
-          {/* Amount + actions */}
-          <div className="field" style={{ marginTop: 14 }}>
-            <label htmlFor="stake-amount">Amount ({TOKEN_SYMBOL})</label>
-            <input
-              id="stake-amount"
-              inputMode="decimal"
-              placeholder="0.0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={anyBusy}
-            />
-          </div>
-          <div className="brief" style={{ marginTop: 6, fontSize: 13, color: "var(--text-mute)" }}>
-            Wallet {formatTokensPretty(walletBal)}{" "}
-            <button type="button" style={maxBtnStyle} onClick={() => setAmount(formatTokens(walletBal))} disabled={anyBusy}>Max</button>
-            {"  ·  "}
-            Staked {formatTokensPretty(staked)}{" "}
-            <button type="button" style={maxBtnStyle} onClick={() => setAmount(formatTokens(staked))} disabled={anyBusy}>Max</button>
-          </div>
+          {!connected ? (
+            <>
+              <p className="brief" style={{ marginTop: 16, textAlign: "center" }}>
+                Connect your Solana wallet to stake {TOKEN_SYMBOL}. Every stake, unstake, and claim is signed by
+                your own wallet — nothing is stored here.
+              </p>
+              <WalletConnectButton className="btn btn-green btn-block btn-lg swapx-cta" />
+            </>
+          ) : (
+            <>
+              {/* Amount card (Across-style) */}
+              <div className="swapx-form">
+                <div className="swapx-card">
+                  <div className="swapx-card-top">
+                    <span className="swapx-card-label">Amount</span>
+                    <span className="swapx-bal">
+                      Wallet: {formatTokensPretty(walletBal)} {TOKEN_SYMBOL}
+                      <button
+                        type="button"
+                        className="swapx-max"
+                        onClick={() => setAmount(formatTokens(walletBal))}
+                        disabled={anyBusy}
+                      >
+                        Max
+                      </button>
+                    </span>
+                  </div>
+                  <div className="swapx-card-row">
+                    <input
+                      id="stake-amount"
+                      className="swapx-amount"
+                      inputMode="decimal"
+                      placeholder="0.0"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      disabled={anyBusy}
+                      aria-label={`Amount in ${TOKEN_SYMBOL}`}
+                    />
+                    <span className="swapx-asset swapx-asset-static" title={TOKEN_SYMBOL}>
+                      <span className="swapx-ic swapx-ic-plsx" aria-hidden>{PLSX_MARK}</span>
+                      <span className="swapx-asset-meta">
+                        <b>{TOKEN_SYMBOL}</b>
+                        <small>{network.label}</small>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <button className="btn btn-green" onClick={() => runAction("stake")} disabled={anyBusy}>
-              {busy === "stake" ? "Staking…" : "Stake"}
-            </button>
-            <button className="btn btn-ghost" onClick={() => runAction("unstake")} disabled={anyBusy}>
-              {busy === "unstake" ? "Unstaking…" : "Unstake"}
-            </button>
-            <button className="btn btn-ghost" onClick={() => runAction("claim")} disabled={anyBusy || earned <= 0n}>
-              {busy === "claim" ? "Claiming…" : "Claim rewards"}
-            </button>
-            <WalletConnectButton className="btn btn-ghost btn-sm" />
-          </div>
+              {/* Your position */}
+              <div className="swapx-info">
+                <div className="swapx-info-row">
+                  <span>Your stake</span>
+                  <b>
+                    {formatTokensPretty(staked)} {TOKEN_SYMBOL}
+                    <button
+                      type="button"
+                      className="swapx-max"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => setAmount(formatTokens(staked))}
+                      disabled={anyBusy}
+                    >
+                      Max
+                    </button>
+                  </b>
+                </div>
+                <div className="swapx-info-row">
+                  <span>Earned (live est.)</span>
+                  <b>{formatTokensPretty(earned)} {TOKEN_SYMBOL}</b>
+                </div>
+              </div>
 
-          {okSig ? (
-            <div className="alert ok" style={{ marginTop: 12 }}>
-              Confirmed on-chain.{" "}
-              <a href={explorerUrlFor(network.cluster, okSig, "tx")} target="_blank" rel="noopener noreferrer">
-                View transaction ↗
-              </a>
-            </div>
-          ) : null}
-          {error ? <div className="alert err" style={{ marginTop: 12 }}>{error}</div> : null}
+              {/* Actions — primary Stake + secondary Unstake / Claim */}
+              <button
+                className="btn btn-green btn-block btn-lg swapx-cta"
+                onClick={() => runAction("stake")}
+                disabled={anyBusy}
+              >
+                {busy === "stake" ? "Staking…" : `Stake ${TOKEN_SYMBOL}`}
+              </button>
+              <div className="stakex-actions">
+                <button className="btn btn-ghost btn-block" onClick={() => runAction("unstake")} disabled={anyBusy}>
+                  {busy === "unstake" ? "Unstaking…" : "Unstake"}
+                </button>
+                <button
+                  className="btn btn-ghost btn-block"
+                  onClick={() => runAction("claim")}
+                  disabled={anyBusy || earned <= 0n}
+                >
+                  {busy === "claim" ? "Claiming…" : "Claim rewards"}
+                </button>
+              </div>
+              <div className="stakex-wallet">
+                <WalletConnectButton className="btn btn-ghost btn-sm" />
+              </div>
+
+              {okSig ? (
+                <div className="alert ok" style={{ marginTop: 12 }}>
+                  Confirmed on-chain.{" "}
+                  <a href={explorerUrlFor(network.cluster, okSig, "tx")} target="_blank" rel="noopener noreferrer">
+                    View transaction ↗
+                  </a>
+                </div>
+              ) : null}
+              {error ? <div className="alert err" style={{ marginTop: 12 }}>{error}</div> : null}
+            </>
+          )}
+
+          {/* Live status — the pool really exists on-chain here. */}
+          <div className="swapx-pool">
+            <span className="swapx-pool-dot" aria-hidden /> Live on {network.label} · rewards{" "}
+            {rewardRate > 0n ? "active" : "paused"}
+          </div>
         </>
       )}
 
-      <p className="brief" style={{ marginTop: 14, marginBottom: 0, color: "var(--text-mute)", fontSize: 13 }}>
+      <p className="brief swapx-note">
         {loading ? "Reading on-chain state… " : ""}
         Devnet PLSX has no monetary value. Rewards are paid from the reward vault while it is funded;
         a claim pays out what the vault can cover. Figures are read live from Solana; the “earned”

@@ -4013,3 +4013,71 @@ tbody tr:last-child td { border-bottom: none; }
   .swapx-asset-meta small { display: none; }
 }
 
+/* ============================================================ */
+/* Stake dashboard — the SAME Across visual system as swap.      */
+/* Stake PLSX -> earn PLSX on Devnet. Visual layer only; every   */
+/* number is a real on-chain value from components/StakePanel.js.*/
+/* ============================================================ */
+.stakex-stats {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.stakex-stat {
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 13px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.stakex-stat-lbl {
+  font-size: 11.5px;
+  color: var(--text-mute);
+  font-weight: var(--fw-medium);
+  letter-spacing: .01em;
+}
+.stakex-stat-val {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: var(--fw-display);
+  letter-spacing: -.01em;
+  color: var(--text);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.stakex-stat-val i {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--text-mute);
+  font-weight: var(--fw-semibold);
+  margin-left: 3px;
+}
+.stakex-stat-val.accent { color: var(--accent); }
+
+/* A non-interactive token pill — staking has a single asset, nothing to flip. */
+.swapx-asset-static { cursor: default; }
+.swapx-asset-static:hover { border-color: var(--border); background: var(--bg-card-2); }
+.swapx-asset-static:active { transform: none; }
+
+/* Secondary actions sit under the primary Stake CTA. */
+.stakex-actions {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stakex-wallet { margin-top: 12px; display: flex; justify-content: center; }
+
+@media (max-width: 560px) {
+  .stakex-stats { grid-template-columns: 1fr 1fr; }
+  .stakex-stat:last-child { grid-column: 1 / -1; }
+  .stakex-stat-val { font-size: 17px; }
+}
+
