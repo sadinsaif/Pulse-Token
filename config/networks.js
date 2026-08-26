@@ -41,7 +41,11 @@ export const DEVNET_CONFIG = {
     solBalance: true, // live SOL balance
     faucetSol: true, // real requestAirdrop (public faucet)
     faucetToken: false, // no PLSX faucet — needs a controlled mint authority
-    swap: false,
+    // ✅ LIVE (Devnet only): the real constant-product AMM (x·y=k) is deployed, seeded,
+    // and on-chain-verified (program 44TCfrjB…, pool CWWwvHn…, vault Cb181Fi…, reserves
+    // 1000 PLSX / 1 SOL, fee 0.30%, authority hU7g65F…). Testnet/Mainnet keep swap:false —
+    // no PLSX exists there, so DefiGrid (features.swap && network.mint) keeps them Coming Soon.
+    swap: true,
     // ✅ LIVE (Devnet only): the real Anchor staking pool is deployed, funded, and
     // on-chain-verified (program 52J8…, pool 5PTsh1Hn…, reward vault funded 5000
     // PLSX, reward_rate 3171). Testnet/Mainnet keep stake:false — no PLSX exists
