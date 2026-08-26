@@ -3833,3 +3833,183 @@ tbody tr:last-child td { border-bottom: none; }
   .eco-teaser-card, .netsel-btn, .netsel-item { transition: none !important; }
 }
 
+/* ============================================================ */
+/* Swap dashboard — Across-style From/To cards + flip + big CTA */
+/* PLSX <-> SOL on Devnet. Visual layer only: every number is a  */
+/* real on-chain value produced by components/SwapPanel.js.      */
+/* ============================================================ */
+.swapx-head { flex-wrap: wrap; gap: 12px; margin-bottom: 4px; }
+
+.swapx-form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swapx-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 18px;
+  transition: border-color var(--t-med, .18s) var(--ease, ease), box-shadow var(--t-med, .18s) var(--ease, ease);
+}
+.swapx-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* The receive card is read-only — no focus glow. */
+.swapx-card-to:focus-within { border-color: var(--border); box-shadow: none; }
+
+.swapx-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: var(--text-mute);
+}
+.swapx-card-label { font-weight: var(--fw-semibold); letter-spacing: .01em; }
+.swapx-bal { color: var(--text-dim); display: inline-flex; align-items: center; gap: 8px; }
+.swapx-max {
+  background: none; border: none; padding: 0; font: inherit; cursor: pointer;
+  color: var(--accent); font-weight: var(--fw-bold);
+}
+.swapx-max:hover { text-decoration: underline; }
+.swapx-max:disabled { opacity: .5; cursor: default; text-decoration: none; }
+
+.swapx-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+.swapx-amount {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: var(--fw-display);
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+.swapx-amount::placeholder { color: var(--text-mute); opacity: .7; }
+.swapx-amount-out { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.swapx-amount-out.is-zero { color: var(--text-mute); }
+
+.swapx-asset {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px 7px 8px;
+  cursor: pointer;
+  color: var(--text);
+  transition: border-color var(--t-med, .18s) var(--ease, ease), background var(--t-med, .18s) var(--ease, ease), transform var(--t-fast, .12s) var(--ease, ease);
+}
+.swapx-asset:hover { border-color: var(--accent-line); background: var(--bg-card); }
+.swapx-asset:active { transform: scale(.97); }
+.swapx-asset:disabled { opacity: .7; cursor: default; }
+
+.swapx-ic {
+  width: 28px; height: 28px; flex: none;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07);
+}
+.swapx-ic svg, .swapx-ic img { display: block; }
+.swapx-ic-sol svg { width: 17px; height: auto; }
+.swapx-ic-plsx img { width: 26px; height: 26px; object-fit: contain; }
+
+.swapx-asset-meta { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+.swapx-asset-meta b { font-size: 15px; font-weight: var(--fw-bold); }
+.swapx-asset-meta small { font-size: 10.5px; color: var(--text-mute); font-weight: var(--fw-medium); }
+
+/* Circular flip button, notched between the two cards. */
+.swapx-flip-row {
+  display: flex;
+  justify-content: center;
+  margin: -13px 0;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+.swapx-flip {
+  pointer-events: auto;
+  width: 40px; height: 40px;
+  border-radius: 13px;
+  display: grid; place-items: center;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px var(--bg-card);
+  transition: transform var(--t-med, .2s) var(--ease, ease), border-color var(--t-med, .18s) var(--ease, ease), background var(--t-med, .18s) var(--ease, ease), color var(--t-med, .18s) var(--ease, ease);
+}
+.swapx-flip:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-card); transform: rotate(180deg); }
+.swapx-flip:active { transform: rotate(180deg) scale(.92); }
+.swapx-flip:disabled { opacity: .6; cursor: default; }
+
+.swapx-info {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px 15px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  font-size: 13px;
+}
+.swapx-info-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.swapx-info-row > span { color: var(--text-mute); }
+.swapx-info-row > b { color: var(--text); font-weight: var(--fw-semibold); }
+.swapx-slip { display: inline-flex; align-items: center; gap: 6px; }
+.swapx-slip-input {
+  width: 58px; text-align: right;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  color: var(--text);
+  font: inherit; font-size: 13px;
+  outline: none;
+}
+.swapx-slip-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.swapx-slip-pct { color: var(--text-mute); }
+
+.swapx-cta { margin-top: 14px; }
+
+.swapx-pool {
+  margin-top: 14px;
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-mute);
+}
+.swapx-pool b { color: var(--text-dim); font-weight: var(--fw-bold); }
+.swapx-pool-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  flex: none;
+}
+.swapx-note { margin-top: 14px; margin-bottom: 0; color: var(--text-mute); font-size: 12.5px; }
+
+@media (max-width: 560px) {
+  .swapx-amount { font-size: 25px; }
+  .swapx-asset-meta small { display: none; }
+}
+

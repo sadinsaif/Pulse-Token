@@ -27,21 +27,29 @@ import {
   feePercentFromBps,
 } from "@/lib/swap";
 
-const panelStyle = { maxWidth: 720, margin: "0 auto" };
-
-const maxBtnStyle = {
-  background: "none",
-  border: "none",
-  padding: 0,
-  font: "inherit",
-  color: "var(--green, #22c55e)",
-  cursor: "pointer",
-  textDecoration: "underline",
-};
+const panelStyle = { maxWidth: 560, margin: "0 auto" };
 
 // A small fee buffer (0.01 SOL) kept aside on "Max" so a SOL→PLSX swap can still
 // pay its own transaction fee.
 const SOL_FEE_BUFFER = 10_000_000n; // lamports
+
+// Real brand marks — no invented glyphs. SOL = the official Solana logomark
+// (inline SVG, purple→green, no network fetch); PLSX = the actual PULSE token
+// logo shipped at public/token/logo.png (the same mark the navbar uses).
+const SOL_MARK = (
+  <svg viewBox="0 0 397.7 311.7" role="img" aria-label="Solana">
+    <defs>
+      <linearGradient id="swapxSolGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#9945FF" />
+        <stop offset="100%" stopColor="#14F195" />
+      </linearGradient>
+    </defs>
+    <path fill="url(#swapxSolGrad)" d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" />
+    <path fill="url(#swapxSolGrad)" d="M64.6 3.8C67.1 1.4 70.4 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" />
+    <path fill="url(#swapxSolGrad)" d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" />
+  </svg>
+);
+const PLSX_MARK = <img src="/token/logo.png" alt="" width={26} height={26} />;
 
 function prettyError(e) {
   const msg = (e && (e.message || e.toString())) || "Something went wrong.";
@@ -60,6 +68,11 @@ function prettyError(e) {
  *
  * Only ever mounted when network.features.swap is true (see DefiGrid), i.e. on a
  * network where the pool is deployed + seeded + verified.
+ *
+ * The layout is an Across-style two-card swapper (From / flip / To + a big CTA);
+ * the visuals live in the `.swapx-*` block of globals.css. All logic below the
+ * render boundary is unchanged — quotes, slippage→min_out, and the signed swap
+ * still come straight from the real on-chain reserves.
  */
 export default function SwapPanel({ network: pinned }) {
   const ctx = useNetwork();
@@ -189,7 +202,7 @@ export default function SwapPanel({ network: pinned }) {
   // ── render ────────────────────────────────────────────────────────────────
   if (!mounted) {
     return (
-      <div className="panel" style={panelStyle}>
+      <div className="panel swapx-panel" style={panelStyle}>
         <div className="panel-head"><h3 style={{ margin: 0 }}>Swap</h3></div>
         <p className="brief" style={{ margin: 0 }}>Loading…</p>
       </div>
@@ -198,9 +211,16 @@ export default function SwapPanel({ network: pinned }) {
 
   const fromLabel = solToToken ? "SOL" : TOKEN_SYMBOL;
   const toLabel = solToToken ? TOKEN_SYMBOL : "SOL";
+  const fromKey = solToToken ? "SOL" : "PLSX";
+  const toKey = solToToken ? "PLSX" : "SOL";
+
   const fromBalanceStr = solToToken ? `${formatLamports(walletSol)} SOL` : `${formatTokensPretty(walletPlsx)} ${TOKEN_SYMBOL}`;
-  const quoteStr = solToToken ? `${formatTokensPretty(quote)} ${TOKEN_SYMBOL}` : `${formatLamports(quote)} SOL`;
+  const toBalanceStr = solToToken ? `${formatTokensPretty(walletPlsx)} ${TOKEN_SYMBOL}` : `${formatLamports(walletSol)} SOL`;
+
+  // Numbers only — the asset symbol lives in the pill beside each amount.
+  const quoteNum = quote > 0n ? (solToToken ? formatTokensPretty(quote) : formatLamports(quote)) : "0.0";
   const minOutStr = solToToken ? `${formatTokensPretty(minOut)} ${TOKEN_SYMBOL}` : `${formatLamports(minOut)} SOL`;
+
   const price = plsxPerSol(pool);
   // `price` is ALREADY whole PLSX-per-SOL (both legs are 9-decimal, so the reserve
   // ratio is dimensionless). Format it as a plain number — NOT through the base-unit
@@ -208,33 +228,40 @@ export default function SwapPanel({ network: pinned }) {
   const priceStr =
     price == null ? "—" : price.toLocaleString("en-US", { maximumFractionDigits: price >= 1 ? 2 : 6 });
 
+  const ctaLabel = busy
+    ? "Swapping…"
+    : !amount || amount.trim() === ""
+      ? "Enter an amount"
+      : quote <= 0n
+        ? "Amount too small"
+        : `Swap ${fromLabel} → ${toLabel}`;
+
+  // A token "pill" (icon + symbol + network). Clicking it flips the direction —
+  // with only two real assets, that's the whole picker.
+  const pill = (assetKey, symbol) => (
+    <button
+      type="button"
+      className="swapx-asset"
+      onClick={flip}
+      disabled={busy}
+      title="Switch direction"
+      aria-label={`${symbol} — switch direction`}
+    >
+      <span className={`swapx-ic swapx-ic-${assetKey === "SOL" ? "sol" : "plsx"}`} aria-hidden>
+        {assetKey === "SOL" ? SOL_MARK : PLSX_MARK}
+      </span>
+      <span className="swapx-asset-meta">
+        <b>{symbol}</b>
+        <small>{network.label}</small>
+      </span>
+    </button>
+  );
+
   return (
-    <div className="panel" style={panelStyle}>
-      <div
-        className="panel-head"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}
-      >
+    <div className="panel swapx-panel" style={panelStyle}>
+      <div className="panel-head swapx-head">
         <h3 style={{ margin: 0 }}>Swap</h3>
         <span className={`tag-pill tone-${network.tone}`}>{network.short}</span>
-      </div>
-
-      {/* Pool stats — all real on-chain values */}
-      <div className="kpis" style={{ marginTop: 14, gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">🪙</span></div>
-          <div className="k-val">{formatTokensPretty(pool?.tokenReserve ?? 0n)}</div>
-          <div className="k-lbl">{TOKEN_SYMBOL} reserve</div>
-        </div>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">◎</span></div>
-          <div className="k-val">{formatLamports(pool?.solReserve ?? 0n)}</div>
-          <div className="k-lbl">SOL reserve</div>
-        </div>
-        <div className="kpi">
-          <div className="k-top"><span className="k-ic">💱</span></div>
-          <div className="k-val">{pool ? `${feePercentFromBps(pool.feeBps)}%` : "—"}</div>
-          <div className="k-lbl">Swap fee</div>
-        </div>
       </div>
 
       {!enabled ? (
@@ -250,78 +277,101 @@ export default function SwapPanel({ network: pinned }) {
           This pool has <strong>no liquidity yet</strong>, so there is no price to quote. Liquidity is added by the
           pool authority.
         </p>
-      ) : !connected ? (
-        <div style={{ textAlign: "center", padding: "18px 0 6px" }}>
-          <p className="brief" style={{ marginTop: 0 }}>
-            Connect your Solana wallet to swap. The current rate is{" "}
-            {price ? <strong>1 SOL ≈ {priceStr} {TOKEN_SYMBOL}</strong> : "—"}.
-            Every swap is signed by your own wallet — nothing is stored here.
-          </p>
-          <WalletConnectButton className="btn btn-green btn-lg" />
-        </div>
       ) : (
         <>
-          <div className="brief" style={{ marginTop: 14, fontSize: 13, color: "var(--text-mute)" }}>
-            Rate: {price ? <>1 SOL ≈ {priceStr} {TOKEN_SYMBOL}</> : "—"} (from live reserves)
-          </div>
+          <div className="swapx-form">
+            {/* FROM */}
+            <div className="swapx-card">
+              <div className="swapx-card-top">
+                <span className="swapx-card-label">You pay</span>
+                <span className="swapx-bal">
+                  Balance: {connected ? fromBalanceStr : "—"}
+                  {connected ? (
+                    <button type="button" className="swapx-max" onClick={setMax} disabled={busy}>Max</button>
+                  ) : null}
+                </span>
+              </div>
+              <div className="swapx-card-row">
+                <input
+                  className="swapx-amount"
+                  inputMode="decimal"
+                  placeholder="0.0"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  disabled={busy}
+                  aria-label={`Amount to pay in ${fromLabel}`}
+                />
+                {pill(fromKey, fromLabel)}
+              </div>
+            </div>
 
-          {/* From */}
-          <div className="field" style={{ marginTop: 12 }}>
-            <label htmlFor="swap-amount">You pay ({fromLabel})</label>
-            <input
-              id="swap-amount"
-              inputMode="decimal"
-              placeholder="0.0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={busy}
-            />
-          </div>
-          <div className="brief" style={{ marginTop: 6, fontSize: 13, color: "var(--text-mute)" }}>
-            Balance {fromBalanceStr}{" "}
-            <button type="button" style={maxBtnStyle} onClick={setMax} disabled={busy}>Max</button>
-          </div>
+            {/* FLIP */}
+            <div className="swapx-flip-row">
+              <button
+                type="button"
+                className="swapx-flip"
+                onClick={flip}
+                disabled={busy}
+                aria-label="Switch direction"
+              >
+                ↓
+              </button>
+            </div>
 
-          {/* Flip direction */}
-          <div style={{ marginTop: 12, display: "flex", justifyContent: "center" }}>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={flip} disabled={busy} aria-label="Swap direction">
-              ⇅ {fromLabel} → {toLabel}
-            </button>
-          </div>
-
-          {/* To (quote) */}
-          <div className="field" style={{ marginTop: 8 }}>
-            <label>You receive ({toLabel}, estimated)</label>
-            <div
-              className="k-val"
-              style={{ padding: "10px 12px", border: "1px solid var(--border, #333)", borderRadius: 10, fontSize: 18 }}
-            >
-              ≈ {quoteStr}
+            {/* TO (estimated) */}
+            <div className="swapx-card swapx-card-to">
+              <div className="swapx-card-top">
+                <span className="swapx-card-label">You receive (estimated)</span>
+                <span className="swapx-bal">Balance: {connected ? toBalanceStr : "—"}</span>
+              </div>
+              <div className="swapx-card-row">
+                <div className={`swapx-amount swapx-amount-out${quote > 0n ? "" : " is-zero"}`}>
+                  {quote > 0n ? "≈ " : ""}{quoteNum}
+                </div>
+                {pill(toKey, toLabel)}
+              </div>
             </div>
           </div>
 
-          {/* Slippage */}
-          <div className="field" style={{ marginTop: 12 }}>
-            <label htmlFor="swap-slippage">Max slippage %</label>
-            <input
-              id="swap-slippage"
-              inputMode="decimal"
-              placeholder="1"
-              value={slippage}
-              onChange={(e) => setSlippage(e.target.value)}
-              disabled={busy}
-            />
-          </div>
-          <div className="brief" style={{ marginTop: 6, fontSize: 13, color: "var(--text-mute)" }}>
-            Minimum received (reverts on-chain below this): <strong>{minOutStr}</strong>
+          {/* Rate / slippage / min received */}
+          <div className="swapx-info">
+            <div className="swapx-info-row">
+              <span>Rate</span>
+              <b>{price ? <>1 SOL ≈ {priceStr} {TOKEN_SYMBOL}</> : "—"}</b>
+            </div>
+            <div className="swapx-info-row">
+              <span>Max slippage</span>
+              <span className="swapx-slip">
+                <input
+                  className="swapx-slip-input"
+                  inputMode="decimal"
+                  placeholder="1"
+                  value={slippage}
+                  onChange={(e) => setSlippage(e.target.value)}
+                  disabled={busy}
+                  aria-label="Max slippage percent"
+                />
+                <span className="swapx-slip-pct">%</span>
+              </span>
+            </div>
+            <div className="swapx-info-row">
+              <span>Minimum received</span>
+              <b>{minOutStr}</b>
+            </div>
           </div>
 
-          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            <button className="btn btn-green" onClick={runSwap} disabled={busy || quote <= 0n}>
-              {busy ? "Swapping…" : `Swap ${fromLabel} → ${toLabel}`}
+          {/* CTA — swap when connected, otherwise connect first (form stays visible). */}
+          {connected ? (
+            <button
+              className="btn btn-green btn-block btn-lg swapx-cta"
+              onClick={runSwap}
+              disabled={busy || quote <= 0n}
+            >
+              {ctaLabel}
             </button>
-            <WalletConnectButton className="btn btn-ghost btn-sm" />
-          </div>
+          ) : (
+            <WalletConnectButton className="btn btn-green btn-block btn-lg swapx-cta" />
+          )}
 
           {okSig ? (
             <div className="alert ok" style={{ marginTop: 12 }}>
@@ -332,10 +382,18 @@ export default function SwapPanel({ network: pinned }) {
             </div>
           ) : null}
           {error ? <div className="alert err" style={{ marginTop: 12 }}>{error}</div> : null}
+
+          {/* Live pool — real on-chain reserves, straight from state. */}
+          <div className="swapx-pool">
+            <span className="swapx-pool-dot" aria-hidden /> Live pool ·{" "}
+            <b>{formatTokensPretty(pool?.tokenReserve ?? 0n)}</b> {TOKEN_SYMBOL} ·{" "}
+            <b>{formatLamports(pool?.solReserve ?? 0n)}</b> SOL ·{" "}
+            {pool ? `${feePercentFromBps(pool.feeBps)}%` : "—"} fee
+          </div>
         </>
       )}
 
-      <p className="brief" style={{ marginTop: 14, marginBottom: 0, color: "var(--text-mute)", fontSize: 13 }}>
+      <p className="brief swapx-note">
         {loading ? "Reading on-chain state… " : ""}
         Devnet PLSX has no monetary value. Prices come from a constant-product pool and move with each trade;
         quotes are computed from the current on-chain reserves and the swap reverts if it would fall below your
