@@ -44,8 +44,27 @@ const PUBLIC_RPC = {
   testnet: "https://api.testnet.solana.com",
   "mainnet-beta": "https://api.mainnet-beta.solana.com",
 };
-const FAUCET_CLUSTER = process.env.FAUCET_CLUSTER || "testnet";
-const FAUCET_RPC = process.env.FAUCET_RPC || PUBLIC_RPC[FAUCET_CLUSTER] || PUBLIC_RPC.testnet;
+// Clusters the treasury will serve. The SAME treasury keypair works on EVERY
+// cluster — it just needs its own balance on each one you enable (fund the
+// treasury address separately on devnet and on testnet; a devnet balance can't
+// be spent on testnet and vice-versa). Mainnet is never served, whatever the env
+// says. Default serves BOTH test clusters so a Devnet user (where stake/swap are
+// live) gets treasury SOL, not the flaky public airdrop. Set FAUCET_CLUSTERS to
+// restrict/override (e.g. "devnet"). NOTE: the older singular FAUCET_CLUSTER is
+// no longer read here — testnet is served by default, so a stale one is inert.
+const SERVED_CLUSTERS = (process.env.FAUCET_CLUSTERS || "devnet,testnet")
+  .split(",")
+  .map((s) => s.trim().toLowerCase())
+  .filter((s) => s === "devnet" || s === "testnet"); // never mainnet
+const DEFAULT_CLUSTER = SERVED_CLUSTERS[0] || "devnet";
+
+// Per-cluster RPC: FAUCET_RPC_DEVNET / FAUCET_RPC_TESTNET override the public RPC
+// for that cluster; a bare FAUCET_RPC still overrides all (back-compat).
+function rpcFor(cluster) {
+  const perCluster = process.env[`FAUCET_RPC_${cluster.toUpperCase().replace(/-/g, "_")}`];
+  return perCluster || process.env.FAUCET_RPC || PUBLIC_RPC[cluster] || PUBLIC_RPC.testnet;
+}
+
 const AMOUNT_SOL = Number(process.env.FAUCET_AMOUNT_SOL || "0.1");
 const TRANSFER_LAMPORTS = Math.max(1, Math.round(AMOUNT_SOL * LAMPORTS_PER_SOL));
 const FEE_BUFFER_LAMPORTS = 10_000; // leave room for the tx fee the treasury pays
@@ -145,7 +164,8 @@ export async function POST(req) {
   }
 
   const address = typeof body?.address === "string" ? body.address.trim() : "";
-  const cluster = typeof body?.cluster === "string" ? body.cluster.trim() : FAUCET_CLUSTER;
+  const cluster =
+    typeof body?.cluster === "string" ? body.cluster.trim().toLowerCase() : DEFAULT_CLUSTER;
 
   // 1) Valid recipient?
   if (!address || !isValidAddress(address)) {
@@ -154,14 +174,14 @@ export async function POST(req) {
 
   // 2) Does the treasury even serve this cluster? (checked before load so the
   //    UI can fall back to the keyless public faucet for other clusters.)
-  if (cluster !== FAUCET_CLUSTER) {
-    return json({ ok: false, reason: "wrong-cluster", cluster: FAUCET_CLUSTER });
+  if (!SERVED_CLUSTERS.includes(cluster)) {
+    return json({ ok: false, reason: "wrong-cluster", served: SERVED_CLUSTERS });
   }
 
   // 3) Treasury configured? If not, tell the UI so it can fall back gracefully.
   const faucet = loadFaucet();
   if (!faucet) {
-    return json({ ok: false, reason: "not-configured", cluster: FAUCET_CLUSTER });
+    return json({ ok: false, reason: "not-configured", served: SERVED_CLUSTERS });
   }
 
   // 4) Never fund the treasury's own address.
@@ -171,8 +191,8 @@ export async function POST(req) {
 
   // 5) Rate limit: per-wallet AND per-IP (skip IP bucket when IP is unknown).
   const ip = clientIp(req);
-  const walletKey = `w_${FAUCET_CLUSTER}_${address}`;
-  const ipKey = ip ? `ip_${FAUCET_CLUSTER}_${ip.replace(/[^A-Za-z0-9]/g, "_")}` : "";
+  const walletKey = `w_${cluster}_${address}`;
+  const ipKey = ip ? `ip_${cluster}_${ip.replace(/[^A-Za-z0-9]/g, "_")}` : "";
   const wExp = await limitGet(walletKey);
   const ipExp = ipKey ? await limitGet(ipKey) : 0;
   const limitedUntil = Math.max(wExp, ipExp);
@@ -182,7 +202,7 @@ export async function POST(req) {
 
   // 6) Transfer from the treasury.
   try {
-    const conn = new Connection(FAUCET_RPC, "confirmed");
+    const conn = new Connection(rpcFor(cluster), "confirmed");
     const balance = await conn.getBalance(faucet.publicKey);
     if (balance < TRANSFER_LAMPORTS + FEE_BUFFER_LAMPORTS) {
       return json({ ok: false, reason: "empty", message: "The faucet treasury is temporarily empty." });
@@ -203,7 +223,7 @@ export async function POST(req) {
     await limitSet(walletKey, COOLDOWN_MS);
     if (ipKey) await limitSet(ipKey, COOLDOWN_MS);
 
-    return json({ ok: true, signature, amountSol: AMOUNT_SOL, cluster: FAUCET_CLUSTER });
+    return json({ ok: true, signature, amountSol: AMOUNT_SOL, cluster });
   } catch (e) {
     const raw = e?.message || String(e);
     // Surface a real (but bounded) reason — never a fake success.
@@ -213,5 +233,12 @@ export async function POST(req) {
 
 // A stray GET (or crawler) shouldn't 500 — return a tiny honest status.
 export async function GET() {
-  return json({ ok: true, service: "faucet", method: "POST", cluster: FAUCET_CLUSTER, amountSol: AMOUNT_SOL });
+  return json({
+    ok: true,
+    service: "faucet",
+    method: "POST",
+    served: SERVED_CLUSTERS,
+    defaultCluster: DEFAULT_CLUSTER,
+    amountSol: AMOUNT_SOL,
+  });
 }

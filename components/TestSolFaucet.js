@@ -133,8 +133,14 @@ export default function TestSolFaucet({ network: pinned, onFunded }) {
         return;
       }
 
-      // 2) Treasury not available for this cluster → keyless public faucet.
-      if (data?.reason === "not-configured" || data?.reason === "wrong-cluster") {
+      // 2) Treasury can't serve this claim (not set up for this cluster, wrong
+      //    cluster, or momentarily empty) → best-effort keyless public airdrop,
+      //    then the always-present official-faucet link if that's throttled too.
+      if (
+        data?.reason === "not-configured" ||
+        data?.reason === "wrong-cluster" ||
+        data?.reason === "empty"
+      ) {
         await keylessFallback();
         return;
       }
@@ -148,16 +154,7 @@ export default function TestSolFaucet({ network: pinned, onFunded }) {
         return;
       }
 
-      // 4) Treasury empty.
-      if (data?.reason === "empty") {
-        setResult({
-          ok: false,
-          msg: "The faucet treasury is empty right now. Please use the official web faucet below or come back later.",
-        });
-        return;
-      }
-
-      // 5) Anything else (tx-failed / bad-address / network) → honest error.
+      // 4) Anything else (tx-failed / bad-address / network) → honest error.
       setResult({
         ok: false,
         msg: data?.message
