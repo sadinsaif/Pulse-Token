@@ -3,7 +3,7 @@ import Reveal from "@/components/Reveal";
 import NetworkSelector from "@/components/NetworkSelector";
 import EcosystemStatus from "@/components/EcosystemStatus";
 import BalancePanel from "@/components/BalancePanel";
-import SolBalance from "@/components/SolBalance";
+import SolAssets from "@/components/SolAssets";
 import DefiGrid from "@/components/DefiGrid";
 import TxSafetyNote from "@/components/TxSafetyNote";
 import { PROJECT_NAME, TOKEN_SYMBOL } from "@/lib/config";
@@ -66,17 +66,7 @@ export default function EcosystemPage() {
           </Reveal>
 
           <Reveal style={{ marginTop: 20 }}>
-            <div className="panel" style={{ maxWidth: 720, margin: "0 auto" }}>
-              <div className="panel-head">
-                <h3 style={{ margin: 0 }}>Native SOL</h3>
-              </div>
-              <div className="kpis" style={{ gridTemplateColumns: "1fr" }}>
-                <SolBalance />
-              </div>
-              <p className="brief" style={{ marginTop: 10, marginBottom: 0, color: "var(--text-mute)", fontSize: 13 }}>
-                SOL pays Solana transaction fees. On Devnet/Testnet it&apos;s free test SOL with no value.
-              </p>
-            </div>
+            <SolAssets />
           </Reveal>
         </div>
       </section>
