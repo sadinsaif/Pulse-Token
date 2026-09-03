@@ -6,6 +6,8 @@ import StakePanel from "@/components/StakePanel";
 import StakeAdmin from "@/components/StakeAdmin";
 import SwapPanel from "@/components/SwapPanel";
 import SwapAdmin from "@/components/SwapAdmin";
+import LendPanel from "@/components/LendPanel";
+import LendAdmin from "@/components/LendAdmin";
 import { useNetwork } from "@/components/NetworkProvider";
 import { DEFI_FEATURES } from "@/config/networks";
 
@@ -30,13 +32,15 @@ export default function DefiGrid({ pinnedNetwork }) {
   const network = pinnedNetwork || ctx.network;
   const stakeLive = Boolean(network.features?.stake && network.mint);
   const swapLive = Boolean(network.features?.swap && network.mint);
-  const anyLive = stakeLive || swapLive;
+  const lendLive = Boolean(network.features?.lend && network.mint);
+  const anyLive = stakeLive || swapLive || lendLive;
 
   // When a feature is live, its tile becomes a full panel above the grid, so drop
   // it from the "Coming Soon" card list.
   const liveKeys = new Set();
   if (stakeLive) liveKeys.add("stake");
   if (swapLive) liveKeys.add("swap");
+  if (lendLive) liveKeys.add("lend");
   const cards = liveKeys.size ? DEFI_FEATURES.filter((f) => !liveKeys.has(f.key)) : DEFI_FEATURES;
 
   return (
@@ -48,6 +52,7 @@ export default function DefiGrid({ pinnedNetwork }) {
           The public never sees these. */}
       <StakeAdmin network={pinnedNetwork} />
       <SwapAdmin network={pinnedNetwork} />
+      <LendAdmin network={pinnedNetwork} />
 
       {/* Public panels — only once each honesty gate (features.*) is on. */}
       {stakeLive ? (
@@ -58,6 +63,11 @@ export default function DefiGrid({ pinnedNetwork }) {
       {swapLive ? (
         <Reveal>
           <SwapPanel network={pinnedNetwork} />
+        </Reveal>
+      ) : null}
+      {lendLive ? (
+        <Reveal>
+          <LendPanel network={pinnedNetwork} />
         </Reveal>
       ) : null}
 
